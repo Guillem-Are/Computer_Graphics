@@ -7,6 +7,7 @@
 #include "main/includes.h"
 #include "framework.h"
 #include "image.h"
+#include "ParticleSystem.h"
 
 class Application
 {
@@ -18,7 +19,7 @@ public:
 	int window_width;
 	int window_height;
     int borderWidth = 5;
-
+    ParticleSystem particleSystem;
 	float time;
 
 	// Input

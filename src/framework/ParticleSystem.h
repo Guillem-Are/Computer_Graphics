@@ -4,6 +4,12 @@
 //
 //  Created by Guillem Arevalo Morell on 20/1/26.
 //
+#pragma once
+
+#include "framework.h"
+#include "image.h"
+#include <cstdlib>
+#include <cmath>
 class ParticleSystem {
 
         static const int MAX_PARTICLES = 1000;

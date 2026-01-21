@@ -2,7 +2,7 @@
 #include "mesh.h"
 #include "shader.h"
 #include "utils.h"
-
+#include "ParticleSystem.h"
 Application::Application(const char* caption, int width, int height)
 {
     this->window = createWindow(caption, width, height);
@@ -26,23 +26,26 @@ Application::~Application()
 void Application::Init(void)
 {
     std::cout << "Initiating app..." << std::endl;
+    particleSystem.Init();
 }
 
 // Render one frame
 void Application::Render(void)
 {
     // ...
-    framebuffer.Render();
+    framebuffer.Fill(Color(0, 0, 0));
     framebuffer.DrawLineDDA(50, 100, 500, 200, Color(225, 0, 150));
     framebuffer.DrawRect(400, 250, 300, 400, Color(50, 150, 250), borderWidth, true, Color(0, 200, 250));
     framebuffer.DrawTriangle(Vector2(700,200), Vector2(1100,300),Vector2(875, 500), Color(200, 100, 250), true, Color(0, 150, 250));
+    particleSystem.Render(&framebuffer);
+    framebuffer.Render();
     
 }
 
 // Called after render
 void Application::Update(float seconds_elapsed)
 {
-
+    particleSystem.Update(seconds_elapsed);
 }
 
 //keyboard press event
