@@ -12,7 +12,7 @@
 #include <cmath>
 class ParticleSystem {
 
-        static const int MAX_PARTICLES = 1000;
+        static const int MAX_PARTICLES = 2000;
 
         struct Particle {
                 Vector2 position;

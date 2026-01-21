@@ -33,13 +33,12 @@ void Application::Init(void)
 void Application::Render(void)
 {
     // ...
-    framebuffer.Fill(Color(0, 0, 0));
+    framebuffer.Fill(Color(0, 0, 0)); // clear to black
     framebuffer.DrawLineDDA(50, 100, 500, 200, Color(225, 0, 150));
     framebuffer.DrawRect(400, 250, 300, 400, Color(50, 150, 250), borderWidth, true, Color(0, 200, 250));
-    framebuffer.DrawTriangle(Vector2(700,200), Vector2(1100,300),Vector2(875, 500), Color(200, 100, 250), true, Color(0, 150, 250));
+    framebuffer.DrawTriangle(Vector2(700,200), Vector2(1100,300),Vector2(875, 500), Color(200, 100, 250), true, Color(0, 150,250));
     particleSystem.Render(&framebuffer);
     framebuffer.Render();
-    
 }
 
 // Called after render
