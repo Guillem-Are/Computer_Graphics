@@ -33,11 +33,20 @@ void Application::Init(void)
 void Application::Render(void)
 {
     // ...
-    framebuffer.Fill(Color(0, 0, 0)); // clear to black
+    /*framebuffer.Fill(Color(0, 0, 0)); // clear to black
     framebuffer.DrawLineDDA(50, 100, 500, 200, Color(225, 0, 150));
     framebuffer.DrawRect(400, 250, 300, 400, Color(50, 150, 250), borderWidth, true, Color(0, 200, 250));
     framebuffer.DrawTriangle(Vector2(700,200), Vector2(1100,300),Vector2(875, 500), Color(200, 100, 250), true, Color(0, 150,250));
     particleSystem.Render(&framebuffer);
+    framebuffer.Render();*/
+    
+    // TOOLBAR BACKGROUND:
+    framebuffer.DrawRect(0, 0, 1500, 75, Color(170, 200, 255), borderWidth, true, Color(170, 200, 255));
+    
+    Image img;
+    img.LoadPNG(".../Computer_Graphics/res/images/line.png");
+    framebuffer.DrawImage(img, 100, 100);
+    
     framebuffer.Render();
 }
 
@@ -61,7 +70,7 @@ void Application::OnKeyPressed( SDL_KeyboardEvent event)
 void Application::OnMouseButtonDown( SDL_MouseButtonEvent event )
 {
     if (event.button == SDL_BUTTON_LEFT) {
-
+        
     }
 }
 

@@ -427,16 +427,19 @@ void Image::DrawRect(int x, int y, int w, int h, const Color& borderColor, int b
         x += 1; W -= 1; y+=1; H -= 1;
     }
     if (isFilled){
-        for (int i = 0; i < w - 2*borderWidth; i++) {
+        /*for (int i = 0; i < w - 2*borderWidth; i++) {
             DrawLineDDA(x, y, W, y, fillColor);
             DrawLineDDA(W, y, W, H, fillColor);
             DrawLineDDA(W, H, x, H, fillColor);
             DrawLineDDA(x, H, x, y, fillColor);
             x += 1; W -= 1; y+=1; H -= 1;
+        }*/
+        for (int i = y; i <= H; i++)
+        {
+            DrawLineDDA(x, i, W, i, fillColor);
         }
     }
 
-    
 }
 
 void Image::ScanLineDDA(int x0, int y0, int x1, int y1, std::vector<Cell>& table)
@@ -489,4 +492,17 @@ void Image::DrawTriangle(const Vector2& p0, const Vector2& p1, const Vector2& p2
     
 }
 
+void Image::DrawImage(const Image& image, int x, int y)
+{
+    int w = floor(image.width);
+    float h = floor(image.height);
+    
+    for (int i=0; i < w; i++){
+        for (int j=0; j < h; j++){
+            Color c = image.GetPixel(i,j);
+            SetPixel(i+x,y+j,c);
+        }
+    }
+    
+}
 
