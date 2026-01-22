@@ -44,8 +44,32 @@ void Application::Render(void)
     framebuffer.DrawRect(0, 0, 1500, 75, Color(170, 200, 255), borderWidth, true, Color(170, 200, 255));
     
     Image img;
-    img.LoadPNG(".../Computer_Graphics/res/images/line.png");
-    framebuffer.DrawImage(img, 100, 100);
+    img.LoadPNG("images/clear.png");
+    framebuffer.DrawImage(img,20, 20);
+    img.LoadPNG("images/load.png");
+    framebuffer.DrawImage(img,70 , 20);
+    img.LoadPNG("images/save.png");
+    framebuffer.DrawImage(img, 120, 20);
+    img.LoadPNG("images/eraser.png");
+    framebuffer.DrawImage(img, 170, 20);
+    img.LoadPNG("images/line.png");
+    framebuffer.DrawImage(img, 220, 20);
+    img.LoadPNG("images/rectangle.png");
+    framebuffer.DrawImage(img, 270, 20);
+    img.LoadPNG("images/circle.png");
+    framebuffer.DrawImage(img, 320, 20);
+    img.LoadPNG("images/tringle.png");
+    framebuffer.DrawImage(img, 370, 20);
+    img.LoadPNG("images/white.png");
+    framebuffer.DrawImage(img, 420, 20);
+    img.LoadPNG("images/blue.png");
+    framebuffer.DrawImage(img,470, 20);
+    img.LoadPNG("images/cyan.png");
+    framebuffer.DrawImage(img, 520, 20);
+    img.LoadPNG("images/red.png");
+    framebuffer.DrawImage(img, 570, 20);
+    img.LoadPNG("images/yellow.png");
+    framebuffer.DrawImage(img, 620, 20);
     
     framebuffer.Render();
 }
