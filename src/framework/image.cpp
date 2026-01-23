@@ -430,7 +430,7 @@ void Image::DrawRect(int x, int y, int w, int h, const Color& borderColor, int b
 
         for (int i = y; i <= H; i++)
         {
-            DrawLineDDA(x, i, W, i, fillColor);
+            DrawLineDDA(x, i, W+1, i, fillColor);
         }
     }
 

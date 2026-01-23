@@ -94,14 +94,12 @@ void Application::Init(void)
     b.position = Vector2(370, 20);
     buttons.push_back(b);
     
-    
     particleSystem.Init();
 }
 
 // Render one frame
 void Application::Render(void)
 {
-    // ...
     /*
     framebuffer.DrawLineDDA(50, 100, 500, 200, Color(225, 0, 150));
     framebuffer.DrawRect(400, 250, 300, 400, Color(50, 150, 250), borderWidth, true, Color(0, 200, 250));
@@ -109,6 +107,7 @@ void Application::Render(void)
     particleSystem.Render(&framebuffer);
      */
     
+    // PAINT MODE:
     if (currentMode == 1){
         // TOOLBAR BACKGROUND:
         framebuffer.DrawRect(0, 0, window_width, 75, Color(170, 200, 255), borderWidth, true, Color(170, 200, 255));
@@ -117,6 +116,7 @@ void Application::Render(void)
             b.Draw(framebuffer);
         }
     }
+    // ANIMATION MODE:
     else if (currentMode == 2){
         framebuffer.Fill(Color::BLACK);
         particleSystem.Render(&framebuffer);
@@ -128,17 +128,9 @@ void Application::Render(void)
 // Called after render
 void Application::Update(float seconds_elapsed)
 {
+    // ANIMATION MODE:
     if (currentMode == 2) particleSystem.Update(seconds_elapsed);
-    else{
-        if (isDrawing && (currentTool == TOOL_PENCIL || currentTool == TOOL_ERASER)) {
-           if (mouse_state & SDL_BUTTON(SDL_BUTTON_LEFT)) {
-               Color c = currentColor;
-               if (currentTool == TOOL_ERASER) c = Color:: BLACK;
-               framebuffer.DrawLineDDA(prevMouse.x, prevMouse.y, mouse_position.x, mouse_position.y, c);
-               prevMouse = mouse_position;
-           }
-        }
-    }
+    
 }
 
 //keyboard press event
@@ -218,13 +210,12 @@ void Application::OnMouseButtonUp( SDL_MouseButtonEvent event )
 {
     if (currentMode != 1) return;
     if (event.button == SDL_BUTTON_LEFT && isDrawing) {
+        
         endMouse = mouse_position;
-                
-        Color drawColor = (currentTool == TOOL_ERASER) ? Color::BLACK : currentColor;
         
         // Draw the final shape
         if (currentTool == TOOL_LINE){
-            framebuffer.DrawLineDDA(startMouse.x, startMouse.y, endMouse.x, endMouse.y, drawColor);
+            framebuffer.DrawLineDDA(startMouse.x, startMouse.y, endMouse.x, endMouse.y, currentColor);
         }
         else if (currentTool == TOOL_RECT) {
             int w = endMouse.x - startMouse.x;
@@ -240,10 +231,10 @@ void Application::OnMouseButtonUp( SDL_MouseButtonEvent event )
                 rectY = endMouse.y;
                 h = -h;
             }
-            framebuffer.DrawRect(rectX, rectY, w, h, drawColor, borderWidth, fillShapes, drawColor);
+            framebuffer.DrawRect(rectX, rectY, w, h, currentColor, borderWidth, fillShapes, currentColor);
         }
         else if (currentTool == TOOL_TRIANGLE) {
-            framebuffer.DrawTriangle(startMouse, endMouse, Vector2(startMouse.x + (endMouse.x - startMouse.x), startMouse.y + (endMouse.y - startMouse.y) / 2), drawColor, fillShapes, drawColor);
+            framebuffer.DrawTriangle(startMouse, endMouse, Vector2(startMouse.x + (endMouse.x - startMouse.x), startMouse.y + (endMouse.y - startMouse.y) / 2), currentColor, fillShapes, currentColor);
         }
         
         isDrawing = false;
