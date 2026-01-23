@@ -30,13 +30,8 @@ void ParticleSystem::Update(float dt) {
         Particle& p = particles[i];
         // Update position using velocity
         p.position.y += -p.velocity.y * dt;
-       // p.position.y += p.velocity.y * dt;
-        // Decrease TTL
-      //  p.ttl -= dt;
-        //if (p.ttl <= 0.0f) {
-          //  p.inactive = true; // particle expired
-        //}
-        if (p.position.y < 0) {   // screen height
+       
+        if (p.position.y < 0) {   //screen height
                     p.position.y = 1000;       // reset to top
                     p.position.x = rand() % 1500;  // random x
                 }
@@ -52,7 +47,7 @@ void ParticleSystem::Render(Image* framebuffer) {
         int x = static_cast<int>(p.position.x);
         int y = static_cast<int>(p.position.y);
 
-        // Draw pixel (you can improve to draw circles)
+        //draw pixel
         framebuffer->SetPixel(x, y, p.color);
     }
 }
