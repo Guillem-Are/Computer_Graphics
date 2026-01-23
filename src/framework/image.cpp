@@ -427,13 +427,7 @@ void Image::DrawRect(int x, int y, int w, int h, const Color& borderColor, int b
         x += 1; W -= 1; y+=1; H -= 1;
     }
     if (isFilled){
-        /*for (int i = 0; i < w - 2*borderWidth; i++) {
-            DrawLineDDA(x, y, W, y, fillColor);
-            DrawLineDDA(W, y, W, H, fillColor);
-            DrawLineDDA(W, H, x, H, fillColor);
-            DrawLineDDA(x, H, x, y, fillColor);
-            x += 1; W -= 1; y+=1; H -= 1;
-        }*/
+
         for (int i = y; i <= H; i++)
         {
             DrawLineDDA(x, i, W, i, fillColor);

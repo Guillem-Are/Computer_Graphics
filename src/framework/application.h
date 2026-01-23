@@ -28,6 +28,40 @@ public:
 	int mouse_state; // Tells which buttons are pressed
 	Vector2 mouse_position; // Last mouse position
 	Vector2 mouse_delta; // Mouse movement in the last frame
+    bool isDrawing = false;
+    Vector2 startMouse;
+    Vector2 currentMouse;
+    Vector2 prevMouse;
+    Vector2 endMouse;
+
+    
+    int TOOL_PENCIL = 0;
+    int TOOL_LINE = 1;
+    int TOOL_RECT = 2;
+    int TOOL_TRIANGLE = 3;
+    int TOOL_ERASER = 4;
+    
+    int BTN_PENCIL = 0;
+    int BTN_LINE = 1;
+    int BTN_RECT = 2;
+    int BTN_TRIANGLE = 3;
+    int BTN_ERASER = 4;
+    int BTN_CLEAR = 5;
+    int BTN_LOAD = 6;
+    int BTN_SAVE = 7;
+    int BTN_WHITE = 8;
+    int BTN_BLUE = 9;
+    int BTN_CYAN = 10;
+    int BTN_RED = 11;
+    int BTN_YELL = 12;
+    
+    std:: vector<Button> buttons;
+    
+    int currentTool = TOOL_PENCIL;
+    Color currentColor = Color::WHITE;
+    
+    int currentMode = 1;
+    bool fillShapes = false;
 
 	void OnKeyPressed(SDL_KeyboardEvent event);
 	void OnMouseButtonDown(SDL_MouseButtonEvent event);
