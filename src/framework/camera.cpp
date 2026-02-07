@@ -86,20 +86,35 @@ void Camera::UpdateViewMatrix()
 	view_matrix.SetIdentity();
 
 	// Comment this line to create your own projection matrix!
-	SetExampleViewMatrix();
-
+	//SetExampleViewMatrix();
+    
 	// Remember how to fill a Matrix4x4 (check framework slides)
 	// Careful with the order of matrix multiplications, and be sure to use normalized vectors!
 	
-	// Create the view matrix rotation
-	// ...
-	// view_matrix.M[3][3] = 1.0;
+    Matrix44 translation;
+    translation.SetIdentity();
+    translation.MakeTranslationMatrix(-eye.x, -eye.y, -eye.z);
+    
+    Vector3 forward = eye - center;
+    forward.Normalize();
+    
+    Vector3 right = up.Cross(forward);
+    right.Normalize();
+    
+    Vector3 top = forward.Cross(right);
+    
+    Matrix44 R;
+    R.SetIdentity();
+    R.M[0][0] = right.x;    R.M[1][0] = right.y;   R.M[2][0] = right.z;   R.M[3][0] = 0.0;
+    R.M[0][1] = top.x;      R.M[1][1] = top.y;     R.M[2][1] = top.z;     R.M[3][1] = 0.0;
+    R.M[0][2] = forward.x;  R.M[1][2] = forward.y; R.M[2][2] = forward.z; R.M[3][2] = 0.0;
+    R.M[0][3] = 0.0;        R.M[1][3] = 0.0;       R.M[2][3] = 0.0;       R.M[3][3] = 1.0;
 
-	// Translate view matrix
-	// ...
-
+    view_matrix = R * translation;
+    
 	UpdateViewProjectionMatrix();
 }
+
 
 // Create a projection matrix
 void Camera::UpdateProjectionMatrix()
@@ -108,13 +123,21 @@ void Camera::UpdateProjectionMatrix()
 	projection_matrix.SetIdentity();
 
 	// Comment this line to create your own projection matrix!
-	SetExampleProjectionMatrix();
+	//SetExampleProjectionMatrix();
 
 	// Remember how to fill a Matrix4x4 (check framework slides)
 	
 	if (type == PERSPECTIVE) {
 		// projection_matrix.M[2][3] = -1;
-		// ...
+		float f = 1.0 / tan(fov/2.0);
+        float n_f = near_plane - far_plane;
+        float np = near_plane;
+        float fp = far_plane;
+        // Row 0: [f/aspect, 0, 0, 0]
+       projection_matrix.M[0][0] = f/aspect; projection_matrix.M[1][0] = 0.0; projection_matrix.M[2][0] = 0.0;      projection_matrix.M[3][0] = 0.0;
+       projection_matrix.M[0][1] = 0.0;      projection_matrix.M[1][1] = f;   projection_matrix.M[2][1] = 0.0;      projection_matrix.M[3][1] = 0.0;
+       projection_matrix.M[0][2] = 0.0;      projection_matrix.M[1][2] = 0.0; projection_matrix.M[2][2] = (fp+np)/n_f; projection_matrix.M[3][2] = 2.0*(fp*np)/n_f;
+       projection_matrix.M[0][3] = 0.0;      projection_matrix.M[1][3] = 0.0; projection_matrix.M[2][3] = -1.0;      projection_matrix.M[3][3] = 0.0;
 	}
 	else if (type == ORTHOGRAPHIC) {
 		// ...

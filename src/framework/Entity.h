@@ -20,9 +20,10 @@ public:
     // ATTRIBUTES:
     Mesh* mesh;
     Matrix44 model;
+    Color c;
     
     // METHODS
-    
+    Entity();
     void Render(Image* framebuffer, Camera* camera, const Color& c);
     void Update(float seconds_elapsed);
 };

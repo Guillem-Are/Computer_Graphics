@@ -3,6 +3,8 @@
 #include "shader.h"
 #include "utils.h"
 #include "ParticleSystem.h"
+
+
 Application::Application(const char* caption, int width, int height)
 {
     this->window = createWindow(caption, width, height);
@@ -27,99 +29,55 @@ void Application::Init(void)
 {
     std::cout << "Initiating app..." << std::endl;
     
-    Button b;
+    Matrix44 t, r, s;
+    t.SetIdentity(); r.SetIdentity(); s.SetIdentity();
+    camera = new Camera();
+    camera->SetPerspective(45.0 * DEG2RAD, float(window_width)/float(window_height), 0.1, 100.0);
+    camera->LookAt(Vector3(0,0,15), Vector3(0,0,0), Vector3(0,1,0));
     
-    b.image.LoadPNG("images/clear.png");
-    b.type = BTN_CLEAR;
-    b.position = Vector2(20, 20);
-    buttons.push_back(b);
+    Mesh* mesh = new Mesh();
+    mesh->LoadOBJ("meshes/lee.obj");
     
-    b.image.LoadPNG("images/load.png");
-    b.type = BTN_LOAD;
-    b.position = Vector2(70 , 20);
-    buttons.push_back(b);
+    Entity* e1 = new Entity();
+    e1->mesh = mesh;
+    t.MakeTranslationMatrix(0, 0, 8);
+    s.MakeScaleMatrix(4, 4, 2);
+    e1->model = t*s;
+    entities.push_back(e1);
     
-    b.image.LoadPNG("images/save.png");
-    b.type = BTN_SAVE;
-    b.position = Vector2(120, 20);
-    buttons.push_back(b);
     
-    b.image.LoadPNG("images/eraser.png");
-    b.type = BTN_ERASER;
-    b.position = Vector2(170, 20);
-    buttons.push_back(b);
+    Entity* e2 = new Entity();
+    e2->mesh = mesh;
+    e2->c = Color::BLUE;
+    s.MakeScaleMatrix(6, 6, 2);
+    t.MakeTranslationMatrix(-2, -1, 9);
+    r.MakeRotationMatrix(45.0*DEG2RAD, Vector3(0,1,0));
+    e2->model = t*s*r;
+    entities.push_back(e2);
     
-    b.image.LoadPNG("images/line.png");
-    b.type = BTN_LINE;
-    b.position = Vector2(220, 20);
-    buttons.push_back(b);
     
-    b.image.LoadPNG("images/rectangle.png");
-    b.type = BTN_RECT;
-    b.position = Vector2(270, 20);
-    buttons.push_back(b);
+    Entity* e3 = new Entity();
+    e3->mesh = mesh;
+    e3->c = Color::RED;
+    t.MakeTranslationMatrix(1, -1.5, 11);
+    r.MakeRotationMatrix(35.0*DEG2RAD, Vector3(0,-1,0));
+    s.MakeScaleMatrix(6, 6, 3);
+    e3->model = t*s*r;
+    entities.push_back(e3);
     
-    b.image.LoadPNG("images/triangle.png");
-    b.type = BTN_TRIANGLE;
-    b.position = Vector2(320, 20);
-    buttons.push_back(b);
-    
-    b.image.LoadPNG("images/white.png");
-    b.type = BTN_WHITE;
-    b.position = Vector2(420, 20);
-    buttons.push_back(b);
-    
-    b.image.LoadPNG("images/blue.png");
-    b.type = BTN_BLUE;
-    b.position = Vector2(470, 20);
-    buttons.push_back(b);
-    
-    b.image.LoadPNG("images/cyan.png");
-    b.type = BTN_CYAN;
-    b.position = Vector2(520, 20);
-    buttons.push_back(b);
-    
-    b.image.LoadPNG("images/red.png");
-    b.type = BTN_RED;
-    b.position = Vector2(570, 20);
-    buttons.push_back(b);
-    
-    b.image.LoadPNG("images/yellow.png");
-    b.type = BTN_YELL;
-    b.position = Vector2(620, 20);
-    buttons.push_back(b);
-    
-    b.image.LoadPNG("images/pencil.png");
-    b.type = BTN_PENCIL;
-    b.position = Vector2(370, 20);
-    buttons.push_back(b);
-    
-    particleSystem.Init();
+
 }
 
 // Render one frame
 void Application::Render(void)
 {
-    /*
-    framebuffer.DrawLineDDA(50, 100, 500, 200, Color(225, 0, 150));
-    framebuffer.DrawRect(400, 250, 300, 400, Color(50, 150, 250), borderWidth, true, Color(0, 200, 250));
-    framebuffer.DrawTriangle(Vector2(700,200), Vector2(1100,300),Vector2(875, 500), Color(200, 100, 250), true, Color(0, 150,250));
-    particleSystem.Render(&framebuffer);
-     */
     
-    // PAINT MODE:
-    if (currentMode == 1){
-        // TOOLBAR BACKGROUND:
-        framebuffer.DrawRect(0, 0, window_width, 75, Color(170, 200, 255), borderWidth, true, Color(170, 200, 255));
-        // TOOLBAR IMAGES (WITH BUTTONS)
-        for (Button& b : buttons){
-            b.Draw(framebuffer);
+    framebuffer.Fill(Color::BLACK);
+    for(Entity* e : entities){
+        if(e && e->mesh != NULL){
+            e->Render(&framebuffer, camera, e->c);
         }
-    }
-    // ANIMATION MODE:
-    else if (currentMode == 2){
-        framebuffer.Fill(Color::BLACK);
-        particleSystem.Render(&framebuffer);
+        if (numEntities == 1) break;
     }
     
     framebuffer.Render();
@@ -128,9 +86,7 @@ void Application::Render(void)
 // Called after render
 void Application::Update(float seconds_elapsed)
 {
-    // ANIMATION MODE:
-    if (currentMode == 2) particleSystem.Update(seconds_elapsed);
-    
+    //entities[0]->Update(seconds_elapsed);
 }
 
 //keyboard press event
@@ -139,130 +95,155 @@ void Application::OnKeyPressed( SDL_KeyboardEvent event)
     // KEY CODES: https://wiki.libsdl.org/SDL2/SDL_Keycode
     switch(event.keysym.sym) {
         case SDLK_ESCAPE: exit(0); break; // ESC key, kill the app
-        case SDLK_PLUS: borderWidth++; break;
-        case SDLK_MINUS:if (borderWidth > 1) borderWidth--;  break;
-        case SDLK_1: currentMode = 1; framebuffer.Fill(Color::BLACK); break;
-        case SDLK_2: currentMode = 2; framebuffer.Fill(Color::BLACK); break;
-        case SDLK_f: fillShapes = !fillShapes; break;
+        case SDLK_1: numEntities = 1; break;
+        case SDLK_2: numEntities = 2; break;
+        case SDLK_f: currentProperty = 2; break;
+        case SDLK_n: currentProperty = 1; break;
+        case SDLK_v: currentProperty = 3; break;
+        case SDLK_PLUS:
+            if (currentProperty == 1)
+            {
+                camera->near_plane++;
+                camera->UpdateProjectionMatrix();
+            }
+            else if (currentProperty == 2)
+            {
+                camera->far_plane++;
+                camera->UpdateProjectionMatrix();
+            }
+            else if (currentProperty == 3)
+            {
+                camera->fov++;
+                camera->UpdateProjectionMatrix();
+            }
+            break;
+        case SDLK_MINUS:
+            if (currentProperty == 1 )
+            {
+                camera->near_plane--;
+                camera->UpdateProjectionMatrix();
+            }
+            else if(currentProperty==2)
+            {
+                camera->far_plane--;
+                camera->UpdateProjectionMatrix();
+            }
+            else if (currentProperty == 3)
+            {
+                camera->fov--;
+                camera->UpdateProjectionMatrix();
+            }
+            break;
     }
 }
 
 void Application::OnMouseButtonDown( SDL_MouseButtonEvent event )
 {
-    if (currentMode != 1) return;
     if (event.button == SDL_BUTTON_LEFT) {
-        for (Button& b : buttons) {
-            if (b.IsMouseInside(mouse_position)) {
-                if(b.type == BTN_PENCIL) {
-                    currentTool = TOOL_PENCIL;
-                }
-                else if (b.type == BTN_LINE){
-                    currentTool = TOOL_LINE;
-                }
-                else if (b.type == BTN_RECT){
-                    currentTool = TOOL_RECT;
-                }
-                else if (b.type == BTN_TRIANGLE){
-                    currentTool = TOOL_TRIANGLE;
-                }
-                else if (b.type == BTN_ERASER){
-                    currentTool = TOOL_ERASER;
-                }
-                else if (b.type == BTN_WHITE){
-                    currentColor = Color:: WHITE;
-                }
-                else if (b.type == BTN_BLUE){
-                    currentColor = Color:: BLUE;
-                }
-                else if (b.type == BTN_CYAN){
-                    currentColor = Color:: CYAN;
-                }
-                else if (b.type == BTN_RED){
-                    currentColor = Color:: RED;
-                }
-                else if (b.type == BTN_YELL){
-                    currentColor = Color:: YELLOW;
-                }
-                else if (b.type == BTN_CLEAR){
-                    framebuffer.Fill(Color::BLACK);
-                    framebuffer.DrawRect(0, 0, window_width, 75, Color(170, 200, 255), borderWidth, true, Color(170, 200, 255));
-                    for (Button& btn : buttons) {
-                        btn.Draw(framebuffer);
-                    }
-                }
-                else if (b.type == BTN_LOAD){
-                    framebuffer.LoadPNG("images/fruits.png");
-                }
-                else if (b.type == BTN_SAVE){
-                    framebuffer.SaveTGA("images/img.tga");
-                }
-                   
-                return;
-            }
-        }
-        isDrawing = true;
-        startMouse = mouse_position;
-        prevMouse = mouse_position;
+        isLeftMousePressed = true;
+    }
+    else if (event.button == SDL_BUTTON_RIGHT) {
+        isRightMousePressed = true;
     }
 }
 
 void Application::OnMouseButtonUp( SDL_MouseButtonEvent event )
 {
-    if (currentMode != 1) return;
-    if (event.button == SDL_BUTTON_LEFT && isDrawing) {
-        
-        endMouse = mouse_position;
-        
-        // Draw the final shape
-        if (currentTool == TOOL_LINE){
-            framebuffer.DrawLineDDA(startMouse.x, startMouse.y, endMouse.x, endMouse.y, currentColor);
-        }
-        else if (currentTool == TOOL_RECT) {
-            int w = endMouse.x - startMouse.x;
-            int h = endMouse.y - startMouse.y;
-            int rectX = startMouse.x;
-            int rectY = startMouse.y;
-            
-            if (w < 0) {
-                rectX = endMouse.x;
-                w = -w;
-            }
-            if (h < 0) {
-                rectY = endMouse.y;
-                h = -h;
-            }
-            framebuffer.DrawRect(rectX, rectY, w, h, currentColor, borderWidth, fillShapes, currentColor);
-        }
-        else if (currentTool == TOOL_TRIANGLE) {
-            framebuffer.DrawTriangle(startMouse, endMouse, Vector2(startMouse.x + (endMouse.x - startMouse.x), startMouse.y + (endMouse.y - startMouse.y) / 2), currentColor, fillShapes, currentColor);
-        }
-        
-        isDrawing = false;
+    if (event.button == SDL_BUTTON_LEFT) {
+        isLeftMousePressed = false;
+    }
+    else if (event.button == SDL_BUTTON_RIGHT) {
+        isRightMousePressed = false;
     }
 }
 
 void Application::OnMouseMove(SDL_MouseButtonEvent event)
 {
-    if (!isDrawing) return;
-    
-    currentMouse = mouse_position;
-    
-    if (currentTool == TOOL_PENCIL){
-        framebuffer.DrawLineDDA(prevMouse.x, prevMouse.y, currentMouse.x, currentMouse.y, currentColor);
-        prevMouse = currentMouse;
+    float sensitivity = 0.01;
+    if (isLeftMousePressed) {
+        // Calculate rotation angles from mouse movement
+        float angleY = -mouse_delta.x * sensitivity;  // Horizontal rotation
+        float angleX = -mouse_delta.y * sensitivity;  // Vertical rotation
+        
+        // Get current direction from center to eye
+        Vector3 direction = camera->eye - camera->center;
+        float distance = direction.Length();
+        
+        // Rotate around Y axis (horizontal orbit)
+        Matrix44 ry;
+        ry.MakeRotationMatrix(angleY, Vector3(0, 1, 0));
+        direction = ry * direction;
+        
+        // Rotate around right axis (vertical orbit)
+        Vector3 forward = camera->center - camera->eye;
+        forward.Normalize();
+        Vector3 right = camera->up.Cross(forward);
+        right.Normalize();
+        
+        Matrix44 rx;
+        rx.MakeRotationMatrix(angleX, right);
+        direction = rx * direction;
+        
+        // Restore distance and update eye
+        direction.Normalize();
+        camera->eye = camera->center + (direction * distance);
+        
+        camera->UpdateViewMatrix();
     }
-    else if (currentTool == TOOL_ERASER) {
-        framebuffer.DrawLineDDA(prevMouse.x, prevMouse.y, currentMouse.x, currentMouse.y, Color::BLACK);
-        prevMouse = currentMouse;
-    }
+        
 
+    else if (isRightMousePressed) {
+        
+        // Calculate camera's local axes
+        Vector3 forward = camera->center - camera->eye;
+        forward.Normalize();
+        
+        Vector3 right = camera->up.Cross(forward);
+        right.Normalize();
+        
+        Vector3 up = forward.Cross(right);
+        
+        // Calculate movement
+        Vector3 movement = right * (-mouse_delta.x * sensitivity) + up * (mouse_delta.y * sensitivity);
+        
+        // Move both eye and center
+        camera->eye = camera->eye + movement;
+        camera->center = camera->center + movement;
+        
+        camera->UpdateViewMatrix();
+    }
 }
 
 void Application::OnWheel(SDL_MouseWheelEvent event)
 {
     float dy = event.preciseY;
-
-    // ...
+    float zoomSpeed = 0.5f;
+        
+    // Get direction from eye to center
+    Vector3 direction = camera->center - camera->eye;
+    float currentDistance = direction.Length();
+    direction.Normalize();
+    
+    if (dy > 0) {
+        // Scroll UP - zoom IN (get closer)
+        float newDistance = currentDistance - zoomSpeed;
+        
+        // Don't zoom too close (minimum distance)
+        if (newDistance > 0.5f) {
+            camera->eye = camera->center - direction * newDistance;
+        }
+    }
+    else if (dy < 0) {
+        // Scroll DOWN - zoom OUT (get farther)
+        float newDistance = currentDistance + zoomSpeed;
+        
+        // Don't zoom too far (maximum distance)
+        if (newDistance < 50.0f) {
+            camera->eye = camera->center - direction * newDistance;
+        }
+    }
+    
+    camera->UpdateViewMatrix();
 }
 
 void Application::OnFileChanged(const char* filename)
