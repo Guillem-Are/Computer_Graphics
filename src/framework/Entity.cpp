@@ -20,6 +20,7 @@ void Entity::Render(Image* framebuffer, Camera* camera, FloatImage* zBuffer)
 {
     // Get the vertices of the mesh and iterate through them
     std::vector<Vector3> vertices = mesh->GetVertices();
+    const std::vector<Vector2>& uvs = mesh->GetUVs();
     int numVertices = int(vertices.size());
     
     std::vector<Vector3> projectedVertices;
@@ -72,9 +73,20 @@ void Entity::Render(Image* framebuffer, Camera* camera, FloatImage* zBuffer)
         Color c0 = Color::RED;
         Color c1 = Color::GREEN;
         Color c2 = Color::BLUE;
+        Vector2 uv0 = uvs[i];
+        Vector2 uv1 = uvs[i + 1];
+        Vector2 uv2 = uvs[i + 2];
+
+                // Draw textured triangle with Z-buffer
+        //framebuffer->DrawTriangleInterpolated(p0, p1, p2,Color::WHITE, Color::WHITE, Color::WHITE,zBuffer,texture,uv0, uv1, uv2);
 
                 // Draw the triangle with barycentric interpolation and Z-buffer
-        framebuffer->DrawTriangleInterpolated(p0, p1, p2, c0, c1, c2, zBuffer);
+        framebuffer->DrawTriangleInterpolated(p0, p1, p2,
+                                              Color::WHITE, Color::WHITE, Color::WHITE,
+                                              zBuffer,
+                                              texture,
+                                              uv0, uv1, uv2);
+
             }
     
 }

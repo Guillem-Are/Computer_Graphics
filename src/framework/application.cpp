@@ -38,8 +38,17 @@ void Application::Init(void)
     Mesh* mesh = new Mesh();
     mesh->LoadOBJ("meshes/lee.obj");
     
+    Image* leeTexture = new Image();
+    leeTexture->LoadTGA("textures/lee_color_specular.tga", false);
+    Image* annaTexture = new Image();
+    annaTexture->LoadTGA("textures/anna_color_specular.tga", false);
+    Image* cleoTexture = new Image();
+    cleoTexture->LoadTGA("textures/cleo_color_specular.tga", false);
+
+    
     Entity* e1 = new Entity();
     e1->mesh = mesh;
+    e1->texture = leeTexture;
     t.MakeTranslationMatrix(0, 0, 8);
     s.MakeScaleMatrix(4, 4, 2);
     e1->model = t*s;
@@ -48,6 +57,7 @@ void Application::Init(void)
     
     Entity* e2 = new Entity();
     e2->mesh = mesh;
+    e2->texture = annaTexture;
     e2->c = Color::BLUE;
     s.MakeScaleMatrix(6, 6, 2);
     t.MakeTranslationMatrix(-2, -1, 9);
@@ -58,6 +68,7 @@ void Application::Init(void)
     
     Entity* e3 = new Entity();
     e3->mesh = mesh;
+    e3->texture = cleoTexture;
     e3->c = Color::RED;
     t.MakeTranslationMatrix(1, -1.5, 11);
     r.MakeRotationMatrix(35.0*DEG2RAD, Vector3(0,-1,0));

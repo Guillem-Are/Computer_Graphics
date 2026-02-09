@@ -499,8 +499,9 @@ void Image::DrawImage(const Image& image, int x, int y)
     }
 
 }
-void Image::DrawTriangleInterpolated(const Vector3& p0, const Vector3& p1, const Vector3& p2, const Color& c0, const Color& c1, const Color& c2, FloatImage* zbuffer){
+void Image::DrawTriangleInterpolated(const Vector3& p0, const Vector3& p1, const Vector3& p2, const Color& c0, const Color& c1, const Color& c2, FloatImage* zbuffer, Image * texture, const Vector2& uv0, const Vector2& uv1, const Vector2& uv2){
     // Compute bounding box
+     
     int minX = std::max(0, (int)std::floor(std::min({ p0.x, p1.x, p2.x })));
     int maxX = std::min((int)width - 1, (int)std::ceil(std::max({ p0.x, p1.x, p2.x })));
     int minY = std::max(0, (int)std::floor(std::min({ p0.y, p1.y, p2.y })));
@@ -526,20 +527,25 @@ void Image::DrawTriangleInterpolated(const Vector3& p0, const Vector3& p1, const
             if (w0 < 0 || w1 < 0 || w2 < 0) continue; // outside triangle
 
             // Interpolate color
-            Color col(
-                w0 * c0.r + w1 * c1.r + w2 * c2.r,
-                w0 * c0.g + w1 * c1.g + w2 * c2.g,
-                w0 * c0.b + w1 * c1.b + w2 * c2.b
-            );
+            float z = w0 * p0.z + w1 * p1.z + w2 * p2.z;
 
-            // Interpolate Z and check Z-buffer
-            if (zbuffer) {
-                float z = w0 * p0.z + w1 * p1.z + w2 * p2.z;
-                if (z >= zbuffer->GetPixel(x, y)) continue;
-                zbuffer->SetPixel(x, y, z);
-            }
+                        // Z-buffer test
+                        if (zbuffer && z >= zbuffer->GetPixel(x, y)) continue;
+                        if (zbuffer) zbuffer->SetPixel(x, y, z);
 
-            SetPixel(x, y, col);
+                        // Interpolate UVs
+                        float u = w0 * uv0.x + w1 * uv1.x + w2 * uv2.x;
+                        float v = w0 * uv0.y + w1 * uv1.y + w2 * uv2.y;
+
+                        // Transform UVs to texture space
+                        int texX = (int)(u * (texture->width - 1));
+                        int texY = (int)((1.0f - v) * (texture->height - 1)); // invert V
+
+                        // Sample texture
+                        Color texColor = texture->GetPixelSafe(texX, texY);
+
+                        // Set framebuffer pixel
+                        SetPixel(x, y, texColor);
         }
     }
 }
