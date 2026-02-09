@@ -16,7 +16,7 @@ Entity::Entity()
 }
 
 
-void Entity::Render(Image* framebuffer, Camera* camera, const Color& c)
+void Entity::Render(Image* framebuffer, Camera* camera, FloatImage* zBuffer)
 {
     // Get the vertices of the mesh and iterate through them
     std::vector<Vector3> vertices = mesh->GetVertices();
@@ -35,7 +35,7 @@ void Entity::Render(Image* framebuffer, Camera* camera, const Color& c)
         projectedVertices[i] = clip;
     }
     
-    for(int i=0; i < numVertices; i +=3){
+    for(int i=0; i +2 < numVertices; i +=3){
         // 3 vertices to make a triangle --> AIXO VA AIXI O HAURIA DE SER TOTS AMB TOTS I ANAR FENT DUN EN UN??
         Vector3 v0 = projectedVertices[i];
         Vector3 v1 = projectedVertices[i+1];
@@ -63,11 +63,19 @@ void Entity::Render(Image* framebuffer, Camera* camera, const Color& c)
         int x2 = (int)((v2.x + 1.0f) * 0.5f * width);
         int y2 = (int)((1.0f + v2.y) * 0.5f * height);
         
-        // Draw the triangle
-        framebuffer->DrawLineDDA(x0, y0, x1, y1, c);
-        framebuffer->DrawLineDDA(x1, y1, x2, y2, c);
-        framebuffer->DrawLineDDA(x2, y2, x0, y0, c);
-    }
+        // Draw(fill) the triangle
+        Vector3 p0((v0.x + 1.0f) * 0.5f * width,  (1.0f + v0.y) * 0.5f * height, v0.z);
+        Vector3 p1((v1.x + 1.0f) * 0.5f * width,  (1.0f + v1.y) * 0.5f * height, v1.z);
+        Vector3 p2((v2.x + 1.0f) * 0.5f * width,  (1.0f + v2.y) * 0.5f * height, v2.z);
+
+                // Assign colors (example: you can change to per-vertex color)
+        Color c0 = Color::RED;
+        Color c1 = Color::GREEN;
+        Color c2 = Color::BLUE;
+
+                // Draw the triangle with barycentric interpolation and Z-buffer
+        framebuffer->DrawTriangleInterpolated(p0, p1, p2, c0, c1, c2, zBuffer);
+            }
     
 }
 

@@ -497,6 +497,51 @@ void Image::DrawImage(const Image& image, int x, int y)
             SetPixel(i+x,y+j,c);
         }
     }
-    
+
 }
+void Image::DrawTriangleInterpolated(const Vector3& p0, const Vector3& p1, const Vector3& p2, const Color& c0, const Color& c1, const Color& c2, FloatImage* zbuffer){
+    // Compute bounding box
+    int minX = std::max(0, (int)std::floor(std::min({ p0.x, p1.x, p2.x })));
+    int maxX = std::min((int)width - 1, (int)std::ceil(std::max({ p0.x, p1.x, p2.x })));
+    int minY = std::max(0, (int)std::floor(std::min({ p0.y, p1.y, p2.y })));
+    int maxY = std::min((int)height - 1, (int)std::ceil(std::max({ p0.y, p1.y, p2.y })));
+
+    // Precompute edge vectors
+    Vector3 v0 = p1 - p0;
+    Vector3 v1 = p2 - p0;
+
+    float denom = v0.x * v1.y - v1.x * v0.y;
+    if (denom == 0) return; // Degenerate triangle
+
+    for (int y = minY; y <= maxY; y++) {
+        for (int x = minX; x <= maxX; x++) {
+            Vector3 p((float)x + 0.5f, (float)y + 0.5f, 0.0f); // center of pixel
+            Vector3 vp = p - p0;
+
+            // Compute barycentric coordinates
+            float w1 = (vp.x * v1.y - v1.x * vp.y) / denom;
+            float w2 = (v0.x * vp.y - vp.x * v0.y) / denom;
+            float w0 = 1.0f - w1 - w2;
+
+            if (w0 < 0 || w1 < 0 || w2 < 0) continue; // outside triangle
+
+            // Interpolate color
+            Color col(
+                w0 * c0.r + w1 * c1.r + w2 * c2.r,
+                w0 * c0.g + w1 * c1.g + w2 * c2.g,
+                w0 * c0.b + w1 * c1.b + w2 * c2.b
+            );
+
+            // Interpolate Z and check Z-buffer
+            if (zbuffer) {
+                float z = w0 * p0.z + w1 * p1.z + w2 * p2.z;
+                if (z >= zbuffer->GetPixel(x, y)) continue;
+                zbuffer->SetPixel(x, y, z);
+            }
+
+            SetPixel(x, y, col);
+        }
+    }
+}
+
 

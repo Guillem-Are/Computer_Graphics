@@ -19,12 +19,13 @@ class Entity {
 public:
     // ATTRIBUTES:
     Mesh* mesh;
+    Image* texture = NULL;
     Matrix44 model;
     Color c;
     
     // METHODS
     Entity();
-    void Render(Image* framebuffer, Camera* camera, const Color& c);
+    void Render(Image* framebuffer, Camera* camera, FloatImage* zBuffer);
     void Update(float seconds_elapsed);
 };
 

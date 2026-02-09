@@ -24,7 +24,9 @@ public:
     int borderWidth = 5;
     ParticleSystem particleSystem;
 	float time;
+    FloatImage zbuffer;
 
+    
 	// Input
 	const Uint8* keystate;
 	int mouse_state; // Tells which buttons are pressed

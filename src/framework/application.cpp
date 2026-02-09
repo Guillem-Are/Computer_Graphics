@@ -64,24 +64,27 @@ void Application::Init(void)
     s.MakeScaleMatrix(6, 6, 3);
     e3->model = t*s*r;
     entities.push_back(e3);
-    
+    framebuffer.Resize(window_width, window_height);
+    zbuffer.Resize(window_width, window_height);
 
 }
 
 // Render one frame
 void Application::Render(void)
 {
-    
     framebuffer.Fill(Color::BLACK);
+    zbuffer.Fill(1e9f);
+
     for(Entity* e : entities){
         if(e && e->mesh != NULL){
-            e->Render(&framebuffer, camera, e->c);
+            e->Render(&framebuffer, camera, &zbuffer);
         }
         if (numEntities == 1) break;
     }
-    
+
     framebuffer.Render();
 }
+
 
 // Called after render
 void Application::Update(float seconds_elapsed)
