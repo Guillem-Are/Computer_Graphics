@@ -499,8 +499,16 @@ void Image::DrawImage(const Image& image, int x, int y)
     }
 
 }
-void Image::DrawTriangleInterpolated(const Vector3& p0, const Vector3& p1, const Vector3& p2, const Color& c0, const Color& c1, const Color& c2, FloatImage* zbuffer, Image * texture, const Vector2& uv0, const Vector2& uv1, const Vector2& uv2){
-    // Compute bounding box
+void Image::DrawTriangleInterpolated(const sTriangleInfo& t,FloatImage* zbuffer){
+    const Vector3& p0 = t.p0;
+    const Vector3& p1 = t.p1;
+    const Vector3& p2 = t.p2;
+
+    const Vector2& uv0 = t.uv0;
+    const Vector2& uv1 = t.uv1;
+    const Vector2& uv2 = t.uv2;
+
+    Image* texture = t.texture;
      
     int minX = std::max(0, (int)std::floor(std::min({ p0.x, p1.x, p2.x })));
     int maxX = std::min((int)width - 1, (int)std::ceil(std::max({ p0.x, p1.x, p2.x })));
@@ -530,22 +538,32 @@ void Image::DrawTriangleInterpolated(const Vector3& p0, const Vector3& p1, const
             float z = w0 * p0.z + w1 * p1.z + w2 * p2.z;
 
                         // Z-buffer test
-                        if (zbuffer && z >= zbuffer->GetPixel(x, y)) continue;
-                        if (zbuffer) zbuffer->SetPixel(x, y, z);
+            if (zbuffer && z >= zbuffer->GetPixel(x, y)) continue;
+            if (zbuffer) zbuffer->SetPixel(x, y, z);
+            Color finalColor;
 
                         // Interpolate UVs
-                        float u = w0 * uv0.x + w1 * uv1.x + w2 * uv2.x;
-                        float v = w0 * uv0.y + w1 * uv1.y + w2 * uv2.y;
+            if (texture) {
+                            // Interpolate UV
+                float u = w0 * uv0.x + w1 * uv1.x + w2 * uv2.x;
+                float v = w0 * uv0.y + w1 * uv1.y + w2 * uv2.y;
 
-                        // Transform UVs to texture space
-                        int texX = (int)(u * (texture->width - 1));
-                        int texY = (int)((1.0f - v) * (texture->height - 1)); // invert V
+                            // Transform UVs to texture space
+                int texX = (int)(u * (texture->width - 1));
+                int texY = (int)((1.0f - v) * (texture->height - 1)); // invert V
 
-                        // Sample texture
-                        Color texColor = texture->GetPixelSafe(texX, texY);
+                            // Sample texture
+                finalColor = texture->GetPixelSafe(texX, texY);}
+            else {
+                            // Interpolate vertex colors
+                finalColor.r = w0 * t.c0.r + w1 * t.c1.r + w2 * t.c2.r;
+                finalColor.g = w0 * t.c0.g + w1 * t.c1.g + w2 * t.c2.g;
+                finalColor.b = w0 * t.c0.b + w1 * t.c1.b + w2 * t.c2.b;
+                
+                        }
 
                         // Set framebuffer pixel
-                        SetPixel(x, y, texColor);
+                        SetPixel(x, y, finalColor);
         }
     }
 }

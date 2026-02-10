@@ -19,12 +19,28 @@
 class FloatImage;
 class Entity;
 class Camera;
-
+class Image;
 struct Cell {
     int minx;
     int maxx;
 };
 
+struct sTriangleInfo
+{
+    Vector3 p0;
+    Vector3 p1;
+    Vector3 p2;
+
+    Color c0;
+    Color c1;
+    Color c2;
+
+    Vector2 uv0;
+    Vector2 uv1;
+    Vector2 uv2;
+
+    Image* texture = NULL;
+};
 
 // A matrix of pixels
 class Image
@@ -107,7 +123,9 @@ public:
     void ScanLineDDA(int x0, int y0, int x1, int y1, std::vector<Cell>& table);
     void DrawTriangle(const Vector2& p0, const Vector2& p1, const Vector2& p2, const Color& borderColor, bool isFilled, const Color& fillColor);
     void DrawImage(const Image& image, int x, int y);
-    void DrawTriangleInterpolated(const Vector3& p0, const Vector3& p1, const Vector3& p2, const Color& c0, const Color& c1, const Color& c2, FloatImage* zbuffer, Image * texture, const Vector2& uv0, const Vector2& uv1, const Vector2& uv2);
+    void DrawTriangleInterpolated(const sTriangleInfo& t,FloatImage* zbuffer);
+    
+
 };
 
 

@@ -18,6 +18,11 @@ Entity::Entity()
 
 void Entity::Render(Image* framebuffer, Camera* camera, FloatImage* zBuffer)
 {
+    if (!mesh)
+        return;
+
+    if (!use_occlusion && zBuffer)
+        zBuffer->Fill(1e9f);
     // Get the vertices of the mesh and iterate through them
     std::vector<Vector3> vertices = mesh->GetVertices();
     const std::vector<Vector2>& uvs = mesh->GetUVs();
@@ -81,11 +86,51 @@ void Entity::Render(Image* framebuffer, Camera* camera, FloatImage* zBuffer)
         //framebuffer->DrawTriangleInterpolated(p0, p1, p2,Color::WHITE, Color::WHITE, Color::WHITE,zBuffer,texture,uv0, uv1, uv2);
 
                 // Draw the triangle with barycentric interpolation and Z-buffer
-        framebuffer->DrawTriangleInterpolated(p0, p1, p2,
-                                              Color::WHITE, Color::WHITE, Color::WHITE,
-                                              zBuffer,
-                                              texture,
-                                              uv0, uv1, uv2);
+        //   sTriangleInfo tri;
+        //  tri.p0 = p0;
+        //  tri.p1 = p1;
+        //  tri.p2 = p2;
+
+        //  tri.c0 = Color::WHITE;
+        //   tri.c1 = Color::WHITE;
+        //  tri.c2 = Color::WHITE;
+
+        //   tri.uv0 = uv0;
+        //  tri.uv1 = uv1;
+     //   tri.uv2 = uv2;
+
+       // tri.texture = texture;
+
+       // framebuffer->DrawTriangleInterpolated(tri, zBuffer);
+        
+        if (render_mode == eRenderMode::TRIANGLES_INTERPOLATED)
+               {
+                   sTriangleInfo tri;
+                   tri.p0 = p0;
+                   tri.p1 = p1;
+                   tri.p2 = p2;
+
+                   tri.c0 = c;
+                   tri.c1 = c;
+                   tri.c2 = c;
+
+                   if (use_interpolated_uv && !uvs.empty())
+                   {
+                       tri.uv0 = uvs[i];
+                       tri.uv1 = uvs[i + 1];
+                       tri.uv2 = uvs[i + 2];
+                   }
+                   else
+                   {
+                       tri.uv0 = Vector2(0, 0);
+                       tri.uv1 = Vector2(0, 0);
+                       tri.uv2 = Vector2(0, 0);
+                   }
+
+                   tri.texture = use_texture ? texture : NULL;
+
+                   framebuffer->DrawTriangleInterpolated(tri, use_occlusion ? zBuffer : NULL);
+               }
 
             }
     

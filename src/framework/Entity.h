@@ -17,11 +17,21 @@
 
 class Entity {
 public:
+    enum class eRenderMode {
+            POINTCLOUD,
+            WIREFRAME,
+            TRIANGLES,
+            TRIANGLES_INTERPOLATED
+        };
     // ATTRIBUTES:
     Mesh* mesh;
     Image* texture = NULL;
     Matrix44 model;
     Color c;
+    eRenderMode render_mode = eRenderMode::TRIANGLES_INTERPOLATED;
+    bool use_texture = true;          // T
+    bool use_occlusion = true;        //Z
+    bool use_interpolated_uv = true;//C
     
     // METHODS
     Entity();
