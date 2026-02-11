@@ -158,6 +158,17 @@ void Application::OnKeyPressed( SDL_KeyboardEvent event)
             for (Entity* e : entities)
                 e->use_interpolated_uv = !e->use_interpolated_uv;
             break;
+        case SDLK_w:
+            for (Entity* e : entities)
+            {
+                if (e->render_mode == Entity::eRenderMode::WIREFRAME)
+                    e->render_mode = Entity::eRenderMode::TRIANGLES_INTERPOLATED;
+                else
+                    e->render_mode = Entity::eRenderMode::WIREFRAME;
+            }
+            break;
+
+
             
     }
 }

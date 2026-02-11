@@ -23,7 +23,6 @@ void Entity::Render(Image* framebuffer, Camera* camera, FloatImage* zBuffer)
 
     if (!use_occlusion && zBuffer)
         zBuffer->Fill(1e9f);
-    // Get the vertices of the mesh and iterate through them
     std::vector<Vector3> vertices = mesh->GetVertices();
     const std::vector<Vector2>& uvs = mesh->GetUVs();
     int numVertices = int(vertices.size());
@@ -32,10 +31,7 @@ void Entity::Render(Image* framebuffer, Camera* camera, FloatImage* zBuffer)
     projectedVertices.resize(numVertices);
     
     for(int i=0; i < numVertices; i++){
-        
-        // Transform the vertices from local to world space using the Entity’s model matrix
         Vector3 world = model * vertices[i];
-        // Project each of the world space vertices to clip space positions using your current camera
         Vector3 clip = camera->ProjectVector(world);
     
         projectedVertices[i] = clip;
@@ -46,14 +42,14 @@ void Entity::Render(Image* framebuffer, Camera* camera, FloatImage* zBuffer)
         Vector3 v1 = projectedVertices[i+1];
         Vector3 v2 = projectedVertices[i+2];
         
-        // Make sure to render only the projected triangles that lay inside the cube
+        
         if ((v0.x < -1 && v1.x < -1 && v2.x < -1) || (v0.x >  1 && v1.x >  1 && v2.x >  1) ||
             (v0.y < -1 && v1.y < -1 && v2.y < -1) || (v0.y >  1 && v1.y >  1 && v2.y >  1) ||
             (v0.z < -1 && v1.z < -1 && v2.z < -1) || (v0.z >  1 && v1.z >  1 && v2.z >  1)){
             continue;
         }
         
-        // Before drawing each of the triangle lines, convert the clip space positions to screen space using the framebuffer width and height.
+        
         
         int width = framebuffer->width;
         int height = framebuffer->height;
@@ -68,12 +64,12 @@ void Entity::Render(Image* framebuffer, Camera* camera, FloatImage* zBuffer)
         int x2 = (int)((v2.x + 1.0f) * 0.5f * width);
         int y2 = (int)((1.0f + v2.y) * 0.5f * height);
         
-        // Draw(fill) the triangle
+        
         Vector3 p0((v0.x + 1.0f) * 0.5f * width,  (1.0f + v0.y) * 0.5f * height, v0.z);
         Vector3 p1((v1.x + 1.0f) * 0.5f * width,  (1.0f + v1.y) * 0.5f * height, v1.z);
         Vector3 p2((v2.x + 1.0f) * 0.5f * width,  (1.0f + v2.y) * 0.5f * height, v2.z);
 
-                // Assign colors (example: you can change to per-vertex color)
+                
         Color c0 = Color::RED;
         Color c1 = Color::GREEN;
         Color c2 = Color::BLUE;
@@ -81,10 +77,10 @@ void Entity::Render(Image* framebuffer, Camera* camera, FloatImage* zBuffer)
         Vector2 uv1 = uvs[i + 1];
         Vector2 uv2 = uvs[i + 2];
 
-                // Draw textured triangle with Z-buffer
+                
         //framebuffer->DrawTriangleInterpolated(p0, p1, p2,Color::WHITE, Color::WHITE, Color::WHITE,zBuffer,texture,uv0, uv1, uv2);
 
-                // Draw the triangle with barycentric interpolation and Z-buffer
+                
         //   sTriangleInfo tri;
         //  tri.p0 = p0;
         //  tri.p1 = p1;
@@ -101,8 +97,13 @@ void Entity::Render(Image* framebuffer, Camera* camera, FloatImage* zBuffer)
        // tri.texture = texture;
 
        // framebuffer->DrawTriangleInterpolated(tri, zBuffer);
-        
-        if (render_mode == eRenderMode::TRIANGLES_INTERPOLATED)
+        if (render_mode == eRenderMode::WIREFRAME)
+        {
+            framebuffer->DrawLineDDA((int)p0.x, (int)p0.y, (int)p1.x, (int)p1.y, Color::WHITE);
+            framebuffer->DrawLineDDA((int)p1.x, (int)p1.y, (int)p2.x, (int)p2.y, Color::WHITE);
+            framebuffer->DrawLineDDA((int)p2.x, (int)p2.y, (int)p0.x, (int)p0.y, Color::WHITE);
+        }
+        else if (render_mode == eRenderMode::TRIANGLES_INTERPOLATED)
        {
            sTriangleInfo tri;
            tri.p0 = p0;
@@ -140,14 +141,14 @@ void Entity::Update(float seconds_elapsed)
 {
 
     
-    /*// ROTATION:
-    Matrix44 rotation;
-    rotation.MakeRotationMatrix(seconds_elapsed, Vector3(0, 1, 0));
 
-    model = model * rotation;*/
+    //Matrix44 rotation;
+    //rotation.MakeRotationMatrix(seconds_elapsed, Vector3(0, 1, 0));
+
+    //model = model * rotation;*/
     
     
-    // TRANSLATION:
+   
     Matrix44 t;
     t.MakeTranslationMatrix(0.0, 0.5*sin(seconds_elapsed), 0.0);
     model = model * t;
