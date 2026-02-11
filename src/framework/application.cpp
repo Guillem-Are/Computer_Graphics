@@ -184,42 +184,34 @@ void Application::OnMouseButtonUp( SDL_MouseButtonEvent event )
 
 void Application::OnMouseMove(SDL_MouseButtonEvent event)
 {
-    float sensitivity = 0.01;
+    float sensitivity = 0.001;
     if (isLeftMousePressed) {
-        // Calculate rotation angles from mouse movement
-        float angleY = -mouse_delta.x * sensitivity;  // Horizontal rotation
-        float angleX = -mouse_delta.y * sensitivity;  // Vertical rotation
         
-        // Get current direction from center to eye
-        Vector3 direction = camera->eye - camera->center;
-        float distance = direction.Length();
+        // Calculate how much to rotate based on mouse movement
+        float angleY = mouse_delta.x * sensitivity;  // Move mouse horizonatlly --> rotating around y-axis
+        float angleX = -mouse_delta.y * sensitivity;  // Move mouse vertically --> rotating around x-axis
         
-        // Rotate around Y axis (horizontal orbit)
-        Matrix44 ry;
-        ry.MakeRotationMatrix(angleY, Vector3(0, 1, 0));
-        direction = ry * direction;
+        // rotate around Y axis
+        camera->Rotate(angleY, Vector3(0,1,0));
         
-        // Rotate around right axis (vertical orbit)
-        Vector3 forward = camera->center - camera->eye;
+        
+        // Get the right vector (x axis for camera current position, the vector we rotate around)
+        Vector3 forward = camera->center - camera->eye; // direction camera is looking at
         forward.Normalize();
         Vector3 right = camera->up.Cross(forward);
         right.Normalize();
         
-        Matrix44 rx;
-        rx.MakeRotationMatrix(angleX, right);
-        direction = rx * direction;
+        // rotate around X axis
+        camera->Rotate(angleX, right);
         
-        // Restore distance and update eye
-        direction.Normalize();
-        camera->eye = camera->center + (direction * distance);
-        
+
         camera->UpdateViewMatrix();
     }
         
 
     else if (isRightMousePressed) {
         
-        // Calculate camera's local axes
+        // Calculate camera's local axis
         Vector3 forward = camera->center - camera->eye;
         forward.Normalize();
         
@@ -227,12 +219,13 @@ void Application::OnMouseMove(SDL_MouseButtonEvent event)
         right.Normalize();
         
         Vector3 up = forward.Cross(right);
+
         
         // Calculate movement
-        Vector3 movement = right * (-mouse_delta.x * sensitivity) + up * (mouse_delta.y * sensitivity);
+        Vector3 movement = right * (mouse_delta.x * sensitivity) + up * (mouse_delta.y * sensitivity);
         
         // Move both eye and center
-        camera->eye = camera->eye + movement;
+        //camera->eye = camera->eye + movement;
         camera->center = camera->center + movement;
         
         camera->UpdateViewMatrix();
@@ -241,8 +234,8 @@ void Application::OnMouseMove(SDL_MouseButtonEvent event)
 
 void Application::OnWheel(SDL_MouseWheelEvent event)
 {
-    float dy = event.preciseY;
-    float zoomSpeed = 0.5f;
+    float dy = event.preciseY; // scroll direction
+    float zoomSpeed = 0.5;
         
     // Get direction from eye to center
     Vector3 direction = camera->center - camera->eye;
@@ -251,16 +244,16 @@ void Application::OnWheel(SDL_MouseWheelEvent event)
     
     if (dy > 0) {
         // Scroll UP - zoom IN (get closer)
-        float newDistance = currentDistance - zoomSpeed;
+        float newDistance = currentDistance - zoomSpeed*dy;
         
         // Don't zoom too close (minimum distance)
-        if (newDistance > 0.5f) {
+        if (newDistance > 0.5) {
             camera->eye = camera->center - direction * newDistance;
         }
     }
     else if (dy < 0) {
         // Scroll DOWN - zoom OUT (get farther)
-        float newDistance = currentDistance + zoomSpeed;
+        float newDistance = currentDistance - zoomSpeed*dy;
         
         // Don't zoom too far (maximum distance)
         if (newDistance < 50.0f) {

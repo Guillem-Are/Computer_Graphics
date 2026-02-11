@@ -42,7 +42,6 @@ void Entity::Render(Image* framebuffer, Camera* camera, FloatImage* zBuffer)
     }
     
     for(int i=0; i +2 < numVertices; i +=3){
-        // 3 vertices to make a triangle --> AIXO VA AIXI O HAURIA DE SER TOTS AMB TOTS I ANAR FENT DUN EN UN??
         Vector3 v0 = projectedVertices[i];
         Vector3 v1 = projectedVertices[i+1];
         Vector3 v2 = projectedVertices[i+2];
@@ -104,35 +103,35 @@ void Entity::Render(Image* framebuffer, Camera* camera, FloatImage* zBuffer)
        // framebuffer->DrawTriangleInterpolated(tri, zBuffer);
         
         if (render_mode == eRenderMode::TRIANGLES_INTERPOLATED)
-               {
-                   sTriangleInfo tri;
-                   tri.p0 = p0;
-                   tri.p1 = p1;
-                   tri.p2 = p2;
+       {
+           sTriangleInfo tri;
+           tri.p0 = p0;
+           tri.p1 = p1;
+           tri.p2 = p2;
 
-                   tri.c0 = c;
-                   tri.c1 = c;
-                   tri.c2 = c;
+           tri.c0 = c;
+           tri.c1 = c;
+           tri.c2 = c;
 
-                   if (use_interpolated_uv && !uvs.empty())
-                   {
-                       tri.uv0 = uvs[i];
-                       tri.uv1 = uvs[i + 1];
-                       tri.uv2 = uvs[i + 2];
-                   }
-                   else
-                   {
-                       tri.uv0 = Vector2(0, 0);
-                       tri.uv1 = Vector2(0, 0);
-                       tri.uv2 = Vector2(0, 0);
-                   }
+           if (use_interpolated_uv && !uvs.empty())
+           {
+               tri.uv0 = uvs[i];
+               tri.uv1 = uvs[i + 1];
+               tri.uv2 = uvs[i + 2];
+           }
+           else
+           {
+               tri.uv0 = Vector2(0, 0);
+               tri.uv1 = Vector2(0, 0);
+               tri.uv2 = Vector2(0, 0);
+           }
 
-                   tri.texture = use_texture ? texture : NULL;
+           tri.texture = use_texture ? texture : NULL;
 
-                   framebuffer->DrawTriangleInterpolated(tri, use_occlusion ? zBuffer : NULL);
-               }
+           framebuffer->DrawTriangleInterpolated(tri, use_occlusion ? zBuffer : NULL);
+       }
 
-            }
+    }
     
 }
 
@@ -154,3 +153,4 @@ void Entity::Update(float seconds_elapsed)
     model = model * t;
     
 }
+
