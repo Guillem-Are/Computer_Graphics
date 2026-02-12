@@ -31,7 +31,7 @@ public:
     eRenderMode render_mode = eRenderMode::TRIANGLES_INTERPOLATED;
     bool use_texture = true;          // T
     bool use_occlusion = true;        //Z
-    bool use_interpolated_uv = true;//C
+    bool use_interpolated_uv = true;  //C
     
     // METHODS
     Entity();

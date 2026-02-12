@@ -140,18 +140,9 @@ void Entity::Render(Image* framebuffer, Camera* camera, FloatImage* zBuffer)
 void Entity::Update(float seconds_elapsed)
 {
 
-    
-
-    //Matrix44 rotation;
-    //rotation.MakeRotationMatrix(seconds_elapsed, Vector3(0, 1, 0));
-
-    //model = model * rotation;*/
-    
-    
-   
-    Matrix44 t;
-    t.MakeTranslationMatrix(0.0, 0.5*sin(seconds_elapsed), 0.0);
-    model = model * t;
+    Matrix44 rotation;
+    rotation.MakeRotationMatrix(seconds_elapsed, Vector3(0, 1, 0));
+    model = model * rotation;
     
 }
 
