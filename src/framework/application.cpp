@@ -46,7 +46,7 @@ void Application::Init(void)
     e1->mesh = mesh;
     e1->texture = leeTexture;
     t.MakeTranslationMatrix(0, 0, 8);
-    s.MakeScaleMatrix(4, 4, 2);
+    s.MakeScaleMatrix(4, 4, 3);
     e1->model = t*s;
     entities.push_back(e1);
     
@@ -55,10 +55,10 @@ void Application::Init(void)
     e2->mesh = mesh;
     e2->texture = leeTexture;
     e2->c = Color::BLUE;
-    s.MakeScaleMatrix(6, 6, 2);
+    s.MakeScaleMatrix(6, 6, 4);
     t.MakeTranslationMatrix(-2, -1, 9);
     r.MakeRotationMatrix(45.0*DEG2RAD, Vector3(0,1,0));
-    e2->model = t*s*r;
+    e2->model = t*r*s;
     entities.push_back(e2);
     
     
@@ -68,8 +68,8 @@ void Application::Init(void)
     e3->c = Color::RED;
     t.MakeTranslationMatrix(1, -1.5, 11);
     r.MakeRotationMatrix(35.0*DEG2RAD, Vector3(0,-1,0));
-    s.MakeScaleMatrix(6, 6, 3);
-    e3->model = t*s*r;
+    s.MakeScaleMatrix(4, 4, 3);
+    e3->model = t*r*s;
     entities.push_back(e3);
     framebuffer.Resize(window_width, window_height);
     zbuffer.Resize(window_width, window_height);
@@ -199,7 +199,7 @@ void Application::OnMouseMove(SDL_MouseButtonEvent event)
     if (isLeftMousePressed) {
         sensitivity = 0.001;
         // Calculate how much to rotate based on mouse movement
-        float angleY = mouse_delta.x * sensitivity;   // Move mouse horizonatlly --> rotating around y-axis
+        float angleY = -mouse_delta.x * sensitivity;   // Move mouse horizonatlly --> rotating around y-axis
         float angleX = -mouse_delta.y * sensitivity;  // Move mouse vertically   --> rotating around x-axis
         
         // Get current direction from center to eye

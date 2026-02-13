@@ -537,34 +537,35 @@ void Image::DrawTriangleInterpolated(const sTriangleInfo& t,FloatImage* zbuffer)
             // Interpolate color
             float z = w0 * p0.z + w1 * p1.z + w2 * p2.z;
 
-                        // Z-buffer test
+            // Z-buffer test
             if (zbuffer && z >= zbuffer->GetPixel(x, y)) continue;
             if (zbuffer) zbuffer->SetPixel(x, y, z);
             Color finalColor;
 
-                        // Interpolate UVs
+            // Interpolate UVs
             if (texture) {
-                            // Interpolate UV
+                // Interpolate UV
                 float u = w0 * uv0.x + w1 * uv1.x + w2 * uv2.x;
                 float v = w0 * uv0.y + w1 * uv1.y + w2 * uv2.y;
-
-                            // Transform UVs to texture space
+                
+                // Transform UVs to texture space
                 int texX = (int)(u * (texture->width - 1));
                 int texY = (int)((1.0f - v) * (texture->height - 1)); // invert V
-
-                            // Sample texture
-                finalColor = texture->GetPixelSafe(texX, texY);}
+                
+                // Sample texture
+                finalColor = texture->GetPixelSafe(texX, texY);
+            }
             else {
-                            // Interpolate vertex colors
+                // Interpolate vertex colors
                 finalColor.r = w0 * t.c0.r + w1 * t.c1.r + w2 * t.c2.r;
                 finalColor.g = w0 * t.c0.g + w1 * t.c1.g + w2 * t.c2.g;
                 finalColor.b = w0 * t.c0.b + w1 * t.c1.b + w2 * t.c2.b;
                 
-                        }
+            }
 
-                        // Set framebuffer pixel
-                        SetPixel(x, y, finalColor);
-        }
+            // Set framebuffer pixel
+            SetPixel(x, y, finalColor);
+    }
     }
 }
 
