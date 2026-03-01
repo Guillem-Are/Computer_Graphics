@@ -7,9 +7,10 @@
 #include "main/includes.h"
 #include "framework.h"
 #include "image.h"
-#include "ParticleSystem.h"
-#include "Button.h"
 #include "Entity.h"
+#include "mesh.h"      
+#include "shader.h"
+#include "texture.h"
 
 class Application
 {
@@ -22,7 +23,6 @@ public:
 	int window_width;
 	int window_height;
     int borderWidth = 5;
-    ParticleSystem particleSystem;
 	float time;
     FloatImage zbuffer;
 
@@ -40,14 +40,19 @@ public:
     bool isLeftMousePressed = false;
     bool isRightMousePressed = false;
     
+    Mesh* quad;
+    Shader* shader;
+    Texture* texture;
+
+    int currentTask = 1;
+    int currentSubtask = 0; // 0=a, 1=b, 2=c, 3=d, 4=e, 5=f
+    std::string currentFS = "shaders/task1a.fs";
+    
+    
     std::vector<Entity*> entities;
     Camera* camera;
     
     
-    int numEntities = 1;
-    int currentProperty = 1; // 1 --> Near
-                             // 2 --> Far
-                             // 3 --> Fov
 
 	void OnKeyPressed(SDL_KeyboardEvent event);
 	void OnMouseButtonDown(SDL_MouseButtonEvent event);
@@ -57,7 +62,7 @@ public:
 	void OnFileChanged(const char* filename);
 
 	// CPU Global framebuffer
-	Image framebuffer;
+	// Image framebuffer;
 
 	// Constructor and main methods
 	Application(const char* caption, int width, int height);
@@ -72,7 +77,7 @@ public:
 		glViewport( 0,0, width, height );
 		this->window_width = width;
 		this->window_height = height;
-		this->framebuffer.Resize(width, height);
+		//this->framebuffer.Resize(width, height);
 	}
 
 	Vector2 GetWindowSize()
