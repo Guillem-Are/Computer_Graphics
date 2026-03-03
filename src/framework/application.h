@@ -46,7 +46,8 @@ public:
 
     int currentTask = 1;
     int currentSubtask = 0; // 0=a, 1=b, 2=c, 3=d, 4=e, 5=f
-    std::string currentFS = "shaders/task1a.fs";
+    std::string currentFS = "shaders/task1f.fs";
+   
     
     
     std::vector<Entity*> entities;

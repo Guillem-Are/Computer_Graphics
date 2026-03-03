@@ -13,6 +13,7 @@
 #include "framework.h"
 #include "camera.h"
 #include "image.h"
+#include "shader.h"
 
 
 class Entity {
@@ -28,6 +29,8 @@ public:
     Image* texture = NULL;
     Matrix44 model;
     Color c;
+    Shader* shader = nullptr;
+    
     eRenderMode render_mode = eRenderMode::TRIANGLES_INTERPOLATED;
     bool use_texture = true;          // T
     bool use_occlusion = true;        //Z
@@ -36,6 +39,7 @@ public:
     // METHODS
     Entity();
     void Render(Image* framebuffer, Camera* camera, FloatImage* zBuffer);
+    void Render(Camera* camera);
     void Update(float seconds_elapsed);
 };
 

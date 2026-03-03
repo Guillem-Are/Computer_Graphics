@@ -16,7 +16,6 @@ Application::Application(const char* caption, int width, int height)
     this->window_width = w;
     this->window_height = h;
     this->keystate = SDL_GetKeyboardState(nullptr);
-
     //this->framebuffer.Resize(w, h);
 }
 
@@ -36,6 +35,8 @@ void Application::Init(void)
     
     Mesh* mesh = new Mesh();
     mesh->LoadOBJ("meshes/lee.obj");
+    texture = new Texture();
+    texture->Load("images/fruits.png"); // make sure path is correct
     
     //Image* leeTexture = new Image();
     //leeTexture->LoadTGA("textures/lee_color_specular.tga", false);
@@ -85,7 +86,17 @@ void Application::Render(void)
     if (currentTask != 4)
     {
         shader = Shader::Get("shaders/quad.vs", currentFS.c_str());
+        if (!shader) {
+                   std::cerr << "Error: shader is null! Check currentFS: " << currentFS << std::endl;
+                   return;
+               }
+
+        if (!quad) {
+                   std::cerr << "Error: quad is null!" << std::endl;
+                   return;
+               }
         shader->Enable();
+        texture->Bind();
         shader->SetUniform1("u_aspect_ratio", float(window_width) / float(window_height));
         quad->Render();
         shader->Disable();
@@ -115,13 +126,29 @@ void Application::OnKeyPressed( SDL_KeyboardEvent event)
         case SDLK_3: currentTask = 3; break;
         case SDLK_4: currentTask = 4; break;
 
-        case SDLK_a: currentSubtask = 0; currentFS = "shaders/task" + std::to_string(currentTask) + "a.fs"; break;
-        case SDLK_b: currentSubtask = 1; currentFS = "shaders/task" + std::to_string(currentTask) + "b.fs"; break;
-        case SDLK_c: currentSubtask = 2; currentFS = "shaders/task" + std::to_string(currentTask) + "c.fs"; break;
-        case SDLK_d: currentSubtask = 3; currentFS = "shaders/task" + std::to_string(currentTask) + "d.fs"; break;
-        case SDLK_e: currentSubtask = 4; currentFS = "shaders/task" + std::to_string(currentTask) + "e.fs"; break;
-        case SDLK_f: currentSubtask = 5; currentFS = "shaders/task" + std::to_string(currentTask) + "f.fs"; break;
-    }
+        //case SDLK_a: currentSubtask = 0; currentFS = "shaders/task" + std::to_string(currentTask) + "a.fs"; break;
+            //case SDLK_b: currentSubtask = 1; currentFS = "shaders/task" + std::to_string(currentTask) + "b.fs"; break;
+            //case SDLK_c: currentSubtask = 2; currentFS = "shaders/task" + std::to_string(currentTask) + "c.fs"; break;
+            //case SDLK_d: currentSubtask = 3; currentFS = "shaders/task" + std::to_string(currentTask) + "d.fs"; break;
+            //case SDLK_e: currentSubtask = 4; currentFS = "shaders/task" + std::to_string(currentTask) + "e.fs"; break;
+            //case SDLK_f: currentSubtask = 5; currentFS = "shaders/task" + std::to_string(currentTask) + "f.fs"; break;
+        case SDLK_a: currentSubtask = 0; break;
+        case SDLK_b: currentSubtask = 1; break;
+        case SDLK_c: currentSubtask = 2; break;
+        case SDLK_d: currentSubtask = 3; break;
+        case SDLK_e: currentSubtask = 4; break;
+        case SDLK_f: currentSubtask = 5; break;
+     }
+
+     // 🔥 Always rebuild shader filename after any change
+     char letter = 'a' + currentSubtask;
+
+     currentFS = std::string("shaders/task") +
+                 std::to_string(currentTask) +
+                 letter + ".fs";
+
+     std::cout << "Loading shader: " << currentFS << std::endl;
+    
 }
 
 void Application::OnMouseButtonDown( SDL_MouseButtonEvent event )

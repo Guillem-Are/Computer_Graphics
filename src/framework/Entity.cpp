@@ -16,6 +16,7 @@ Entity::Entity()
 }
 
 
+
 void Entity::Render(Image* framebuffer, Camera* camera, FloatImage* zBuffer)
 {
     if (!mesh)
