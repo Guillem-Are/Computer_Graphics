@@ -37,6 +37,8 @@ void Application::Init(void)
     mesh->LoadOBJ("meshes/lee.obj");
     texture = new Texture();
     texture->Load("images/fruits.png"); // make sure path is correct
+    texture = new Texture();
+    texture->Load("Imagesfcb/.png");
     
     //Image* leeTexture = new Image();
     //leeTexture->LoadTGA("textures/lee_color_specular.tga", false);
