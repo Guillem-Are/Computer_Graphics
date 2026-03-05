@@ -26,10 +26,10 @@ public:
         };
     // ATTRIBUTES:
     Mesh* mesh;
-    Image* texture = NULL;
     Matrix44 model;
     Color c;
     Shader* shader = nullptr;
+    Texture* texture;
     
     eRenderMode render_mode = eRenderMode::TRIANGLES_INTERPOLATED;
     bool use_texture = true;          // T

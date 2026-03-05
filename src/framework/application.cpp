@@ -33,12 +33,17 @@ void Application::Init(void)
     camera->SetPerspective(45.0 * DEG2RAD, float(window_width)/float(window_height), 0.1, 100.0);
     camera->LookAt(Vector3(0,0,15), Vector3(0,0,0), Vector3(0,1,0));
     
+    glEnable(GL_DEPTH_TEST);
+    
     Mesh* mesh = new Mesh();
     mesh->LoadOBJ("meshes/lee.obj");
     texture = new Texture();
     texture->Load("images/fruits.png"); // make sure path is correct
-    texture = new Texture();
-    texture->Load("Imagesfcb/.png");
+    textureTask3 = new Texture();
+    textureTask3->Load("images/image_task3.png");
+    
+    quad = new Mesh();
+    quad->CreateQuad();
     
     //Image* leeTexture = new Image();
     //leeTexture->LoadTGA("textures/lee_color_specular.tga", false);
@@ -46,8 +51,9 @@ void Application::Init(void)
     
     Entity* e1 = new Entity();
     e1->mesh = mesh;
-    //e1->texture = leeTexture;
+    e1->texture = new Texture;
     t.MakeTranslationMatrix(0, 0, 8);
+    
     s.MakeScaleMatrix(4, 4, 3);
     e1->model = t*s;
     entities.push_back(e1);
@@ -85,27 +91,58 @@ void Application::Init(void)
 // Render one frame
 void Application::Render(void)
 {
+    // Don't render anything special for Task 4 yet
     if (currentTask != 4)
     {
+        // Get the shader for current task/subtask
         shader = Shader::Get("shaders/quad.vs", currentFS.c_str());
         if (!shader) {
-                   std::cerr << "Error: shader is null! Check currentFS: " << currentFS << std::endl;
-                   return;
-               }
+            std::cerr << "Error: shader is null! Check currentFS: " << currentFS << std::endl;
+            return;
+        }
 
         if (!quad) {
-                   std::cerr << "Error: quad is null!" << std::endl;
-                   return;
-               }
+            std::cerr << "Error: quad is null!" << std::endl;
+            return;
+        }
+
         shader->Enable();
-        texture->Bind();
+
+        // Bind the right texture
+        if (currentTask == 3)
+        {
+            if (textureTask3)
+            {
+                textureTask3->Bind(); // bind to texture unit 0
+            }
+            else
+            {
+                std::cerr << "Warning: textureTask3 is null!" << std::endl;
+            }
+        }
+        else
+        {
+            if (texture)
+                texture->Bind(); // bind to texture unit 0
+        }
+
+        // Set uniforms
         shader->SetUniform1("u_aspect_ratio", float(window_width) / float(window_height));
+
+        if (currentTask == 3)
+        {
+            shader->SetUniform1("u_time", time);   // pass time for animation/effects
+            shader->SetUniform1("u_texture", 0);   // texture unit 0
+        }
+
+        // Render the quad
         quad->Render();
+
         shader->Disable();
     }
     else
     {
-        
+        // Task 4: implement later
     }
 }
 
@@ -114,6 +151,7 @@ void Application::Render(void)
 void Application::Update(float seconds_elapsed)
 {
     entities[0]->Update(seconds_elapsed);
+    time += seconds_elapsed;
 }
 
 //keyboard press event

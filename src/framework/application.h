@@ -43,6 +43,7 @@ public:
     Mesh* quad;
     Shader* shader;
     Texture* texture;
+    Texture* textureTask3 = nullptr;
 
     int currentTask = 1;
     int currentSubtask = 0; // 0=a, 1=b, 2=c, 3=d, 4=e, 5=f
