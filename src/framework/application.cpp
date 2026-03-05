@@ -51,7 +51,10 @@ void Application::Init(void)
     
     Entity* e1 = new Entity();
     e1->mesh = mesh;
-    e1->texture = new Texture;
+    e1->texture = new Texture();
+    e1->texture->Load("images/fruits.png");  // texture for 3D mesh
+    e1->shader = Shader::Get("shaders/raster.vs", "shaders/raster.fs");
+    
     t.MakeTranslationMatrix(0, 0, 8);
     
     s.MakeScaleMatrix(4, 4, 3);
@@ -68,6 +71,9 @@ void Application::Init(void)
     r.MakeRotationMatrix(45.0*DEG2RAD, Vector3(0,1,0));
     e2->model = t*r*s;
     entities.push_back(e2);
+    e2->texture = new Texture();
+    e2->texture->Load("images/fruits.png");  // texture for 3D mesh
+    e2->shader = Shader::Get("shaders/raster.vs", "shaders/raster.fs");
     
     
     Entity* e3 = new Entity();
@@ -79,7 +85,9 @@ void Application::Init(void)
     s.MakeScaleMatrix(4, 4, 3);
     e3->model = t*r*s;
     entities.push_back(e3);
-    
+    e3->texture = new Texture();
+    e3->texture->Load("images/fruits.png");  // texture for 3D mesh
+    e3->shader = Shader::Get("shaders/raster.vs", "shaders/raster.fs");
     //framebuffer.Resize(window_width, window_height);
     //zbuffer.Resize(window_width, window_height);
     
