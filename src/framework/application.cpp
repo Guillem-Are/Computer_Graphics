@@ -29,131 +29,138 @@ void Application::Init(void)
     
     Matrix44 t, r, s;
     t.SetIdentity(); r.SetIdentity(); s.SetIdentity();
+    
     camera = new Camera();
     camera->SetPerspective(45.0 * DEG2RAD, float(window_width)/float(window_height), 0.1, 100.0);
     camera->LookAt(Vector3(0,0,15), Vector3(0,0,0), Vector3(0,1,0));
     
-    glEnable(GL_DEPTH_TEST);
-    
-    Mesh* mesh = new Mesh();
-    mesh->LoadOBJ("meshes/lee.obj");
+    // 2D textures
     texture = new Texture();
-    texture->Load("images/fruits.png"); // make sure path is correct
+    texture->Load("images/fruits.png");
     textureTask3 = new Texture();
     textureTask3->Load("images/image_task3.png");
     
+    // Quad for 2D tasks
     quad = new Mesh();
     quad->CreateQuad();
     
-    //Image* leeTexture = new Image();
-    //leeTexture->LoadTGA("textures/lee_color_specular.tga", false);
-
+    // 3D mesh
+    Mesh* mesh = new Mesh();
+    mesh->LoadOBJ("meshes/lee.obj");
     
+    // Lee face texture (shared by all entities)
+    Texture* leeTexture = new Texture();
+    leeTexture->Load("textures/lee_color_specular.tga");
+    
+    // Set up the different materials
+    raster_material = new Material();
+    raster_material->shader = Shader::Get("shaders/raster.vs", "shaders/raster.fs");
+    raster_material->color_texture = leeTexture;
+
+    gouraud_material = new Material();
+    gouraud_material->shader = Shader::Get("shaders/gouraud.vs", "shaders/gouraud.fs");
+    gouraud_material->color_texture = leeTexture;
+
+    phong_material = new Material();
+    phong_material->shader = Shader::Get("shaders/phong.vs", "shaders/phong.fs");
+    phong_material->color_texture = leeTexture;
+
+    // Init entities (initialized to raster materials)
     Entity* e1 = new Entity();
     e1->mesh = mesh;
-    e1->texture = new Texture();
-    e1->texture->Load("images/fruits.png");  // texture for 3D mesh
-    e1->shader = Shader::Get("shaders/raster.vs", "shaders/raster.fs");
-    
+    e1->material = raster_material;
     t.MakeTranslationMatrix(0, 0, 8);
-    
     s.MakeScaleMatrix(4, 4, 3);
-    e1->model = t*s;
+    e1->model = t * s;
     entities.push_back(e1);
-    
     
     Entity* e2 = new Entity();
     e2->mesh = mesh;
-    //e2->texture = leeTexture;
-    e2->c = Color::BLUE;
-    s.MakeScaleMatrix(6, 6, 4);
+    e2->material = raster_material;
     t.MakeTranslationMatrix(-2, -1, 9);
-    r.MakeRotationMatrix(45.0*DEG2RAD, Vector3(0,1,0));
-    e2->model = t*r*s;
+    r.MakeRotationMatrix(45.0 * DEG2RAD, Vector3(0, 1, 0));
+    s.MakeScaleMatrix(6, 6, 4);
+    e2->model = t * r * s;
     entities.push_back(e2);
-    e2->texture = new Texture();
-    e2->texture->Load("images/fruits.png");  // texture for 3D mesh
-    e2->shader = Shader::Get("shaders/raster.vs", "shaders/raster.fs");
-    
     
     Entity* e3 = new Entity();
     e3->mesh = mesh;
-    //e3->texture = leeTexture;
-    e3->c = Color::RED;
+    e3->material = raster_material;
     t.MakeTranslationMatrix(1, -1.5, 11);
-    r.MakeRotationMatrix(35.0*DEG2RAD, Vector3(0,-1,0));
+    r.MakeRotationMatrix(35.0 * DEG2RAD, Vector3(0, -1, 0));
     s.MakeScaleMatrix(4, 4, 3);
-    e3->model = t*r*s;
+    e3->model = t * r * s;
     entities.push_back(e3);
-    e3->texture = new Texture();
-    e3->texture->Load("images/fruits.png");  // texture for 3D mesh
-    e3->shader = Shader::Get("shaders/raster.vs", "shaders/raster.fs");
-    //framebuffer.Resize(window_width, window_height);
-    //zbuffer.Resize(window_width, window_height);
     
-    quad = new Mesh();
-    quad->CreateQuad();
+    
+    // Set up scene uniform data
+    uniform_data.ambient_light = Vector3(0.1f, 0.1f, 0.1f);
+    uniform_data.camera_position = camera->eye;
 
+    // Add one light to the scene
+    sLight light1;
+    light1.position = Vector3(0.0f, 5.0f, 20.0f);
+    light1.diffuse  = Vector3(1.0f, 1.0f, 1.0f);
+    uniform_data.lights.push_back(light1);
+    
+    
 }
 
 // Render one frame
 void Application::Render(void)
 {
-    // Don't render anything special for Task 4 yet
-    if (currentTask != 4)
-    {
-        // Get the shader for current task/subtask
-        shader = Shader::Get("shaders/quad.vs", currentFS.c_str());
-        if (!shader) {
-            std::cerr << "Error: shader is null! Check currentFS: " << currentFS << std::endl;
-            return;
-        }
-
-        if (!quad) {
-            std::cerr << "Error: quad is null!" << std::endl;
-            return;
-        }
-
-        shader->Enable();
-
-        // Bind the right texture
-        if (currentTask == 3)
+    // clear the screen before we draw anything
+    glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+    
+    if (!lab5){
+        if (currentTask != 4)
         {
-            if (textureTask3)
+            glDisable(GL_DEPTH_TEST);  // 2D quad doesn't need depth
+            
+            shader = Shader::Get("shaders/quad.vs", currentFS.c_str()); // Load the shader pair for the current task/subtask
+            if (!shader || !quad) return;
+            
+            shader->Enable();
+            
+            // Both tasks 2 and 3 need a texture
+            if (currentTask == 2 || currentTask == 3)
             {
-                textureTask3->Bind(); // bind to texture unit 0
+                Texture* currentTexture = (currentTask == 2) ? texture : textureTask3;
+                currentTexture->Bind();  // fruits.png bound to unit 0
+                shader->SetUniform1("u_texture", 0);
+                shader->SetUniform1("u_time", time);
             }
-            else
-            {
-                std::cerr << "Warning: textureTask3 is null!" << std::endl;
+            
+            shader->SetUniform1("u_aspect_ratio", float(window_width) / float(window_height));
+            
+            quad->Render();
+            shader->Disable();
+        }
+        else  // Task 4: GPU rasterization of 3D mesh
+        {
+            glEnable(GL_DEPTH_TEST);
+
+            uniform_data.viewprojection  = camera->GetViewProjectionMatrix();
+            uniform_data.camera_position = camera->eye;
+
+            for (Entity* e : entities){
+                e->Render(uniform_data);  // <-- was e->Render(camera), now fixed
             }
         }
-        else
-        {
-            if (texture)
-                texture->Bind(); // bind to texture unit 0
-        }
-
-        // Set uniforms
-        shader->SetUniform1("u_aspect_ratio", float(window_width) / float(window_height));
-
-        if (currentTask == 3)
-        {
-            shader->SetUniform1("u_time", time);   // pass time for animation/effects
-            shader->SetUniform1("u_texture", 0);   // texture unit 0
-        }
-
-        // Render the quad
-        quad->Render();
-
-        shader->Disable();
+        
     }
-    else
+    else // lab 5
     {
-        // Task 4: implement later
+        glEnable(GL_DEPTH_TEST);
+
+                // Update scene-level uniforms every frame
+                uniform_data.viewprojection  = camera->GetViewProjectionMatrix();
+                uniform_data.camera_position = camera->eye;
+
+                for (Entity* e : entities)
+                    e->Render(uniform_data);
     }
 }
-
 
 // Called after render
 void Application::Update(float seconds_elapsed)
@@ -182,20 +189,23 @@ void Application::OnKeyPressed( SDL_KeyboardEvent event)
             //case SDLK_f: currentSubtask = 5; currentFS = "shaders/task" + std::to_string(currentTask) + "f.fs"; break;
         case SDLK_a: currentSubtask = 0; break;
         case SDLK_b: currentSubtask = 1; break;
-        case SDLK_c: currentSubtask = 2; break;
+        case SDLK_c: if (lab5) phong_material->use_color_texture = !phong_material->use_color_texture; else currentSubtask = 2;break;
         case SDLK_d: currentSubtask = 3; break;
         case SDLK_e: currentSubtask = 4; break;
         case SDLK_f: currentSubtask = 5; break;
+        case SDLK_l: lab5 = !lab5; break;
+        case SDLK_g: for (Entity* e : entities) e->material = gouraud_material; break;
+        case SDLK_p: for (Entity* e : entities) e->material = phong_material; break;
+        case SDLK_s: phong_material->use_specular_texture = !phong_material->use_specular_texture; break;
+        case SDLK_n: phong_material->use_normal_texture = !phong_material->use_normal_texture; break;
      }
 
-     // 🔥 Always rebuild shader filename after any change
-     char letter = 'a' + currentSubtask;
-
-     currentFS = std::string("shaders/task") +
-                 std::to_string(currentTask) +
-                 letter + ".fs";
-
-     std::cout << "Loading shader: " << currentFS << std::endl;
+     // Always rebuild shader filename after any change
+    if (currentTask >= 1 && currentTask <= 3) {
+        char letter = 'a' + currentSubtask;
+        currentFS = std::string("shaders/task") + std::to_string(currentTask) + letter + ".fs";
+        std::cout << "Loading shader: " << currentFS << std::endl;
+    }
     
 }
 

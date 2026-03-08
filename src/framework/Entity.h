@@ -13,7 +13,7 @@
 #include "framework.h"
 #include "camera.h"
 #include "image.h"
-#include "shader.h"
+#include "material.h"
 
 
 class Entity {
@@ -28,8 +28,7 @@ public:
     Mesh* mesh;
     Matrix44 model;
     Color c;
-    Shader* shader = nullptr;
-    Texture* texture;
+    Material* material;
     
     eRenderMode render_mode = eRenderMode::TRIANGLES_INTERPOLATED;
     bool use_texture = true;          // T
@@ -38,8 +37,8 @@ public:
     
     // METHODS
     Entity();
-    void Render(Image* framebuffer, Camera* camera, FloatImage* zBuffer);
-    void Render(Camera* camera);
+    //void Render(Image* framebuffer, Camera* camera, FloatImage* zBuffer);
+    void Render(sUniformData& uniformData);
     void Update(float seconds_elapsed);
 };
 

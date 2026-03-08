@@ -11,6 +11,7 @@
 Entity::Entity()
 {
     mesh = NULL;
+    material = NULL;
     model.SetIdentity();
     c = Color::WHITE;
 }
@@ -136,30 +137,25 @@ Entity::Entity()
 //  }
     
 //}
-void Entity::Render(Camera* camera)
+void Entity::Render(sUniformData& uniformData)
 {
-    if (!mesh || !shader)
-        return;
+    if (!mesh)     { std::cout << "ERROR: mesh is null\n";     return; }
+    if (!material) { std::cout << "ERROR: material is null\n"; return; }
+    if (!material->shader) { std::cout << "ERROR: shader is null\n"; return; }
 
     // Enable depth test
     glEnable(GL_DEPTH_TEST);
+    
+    uniformData.model = model;
 
     // Use this entity's shader
-    shader->Enable();
-
-    // Send CPU uniforms
-    shader->SetMatrix44("u_model", model);
-    shader->SetMatrix44("u_viewprojection", camera->GetViewProjectionMatrix());
-
-    // Send texture if we have one
-    if (use_texture && texture)
-        shader->SetTexture("u_texture", texture);
+    material->Enable(uniformData);
 
     // Render the mesh
     mesh->Render();  // Make sure Mesh::Render sends its vertices and uvs
 
     // Disable shader after rendering
-    shader->Disable();
+    material->Disable();
 }
 
 

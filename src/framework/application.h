@@ -11,6 +11,7 @@
 #include "mesh.h"      
 #include "shader.h"
 #include "texture.h"
+#include "material.h"
 
 class Application
 {
@@ -47,8 +48,16 @@ public:
 
     int currentTask = 1;
     int currentSubtask = 0; // 0=a, 1=b, 2=c, 3=d, 4=e, 5=f
-    std::string currentFS = "shaders/task1f.fs";
+    std::string currentFS = "shaders/task1a.fs";
+    
+    bool lab5 = false;
+    sUniformData uniform_data;
+    
+    Material* raster_material = nullptr;
+    Material* gouraud_material = nullptr;
+    Material* phong_material = nullptr;
    
+    bool use_specular_texture = false;
     
     
     std::vector<Entity*> entities;
