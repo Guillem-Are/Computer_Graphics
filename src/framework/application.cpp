@@ -105,9 +105,21 @@ void Application::Init(void)
     
     sLight light2;
     light2.position = Vector3(-5.0f,5.0f,5.0f);
-    light2.diffuse  = Vector3(1.0f,0.0f,0.0f);
+    light2.diffuse  = Vector3(0.0f,1.0f,0.0f);
 
     uniform_data.lights.push_back(light2);
+    
+    sLight light3;
+    light3.position = Vector3(5.0f,5.0f,5.0f);
+    light3.diffuse  = Vector3(1.0f,0.0f,0.0f);
+
+    uniform_data.lights.push_back(light3);
+    
+    sLight light4;
+    light4.position = Vector3((rand() % 20) - 10.0f, (rand() % 20) - 10.0f, (rand() % 20) - 10.0f);
+    light4.diffuse  = Vector3((rand() % 100) / 100.0f, (rand() % 100) / 100.0f, (rand() % 100) / 100.0f);
+
+    uniform_data.lights.push_back(light4);
     
     
 }
@@ -164,17 +176,26 @@ void Application::Render(void)
 
             // multipass lighting
             int numLights = std::min(uniform_data.num_lights, (int)uniform_data.lights.size());
+            
+            Vector3 originalAmbient = uniform_data.ambient_light;
 
             for (int i = 0; i < numLights; i++)
             {
                 if (i == 0)
                 {
                     glDisable(GL_BLEND); // first light normal render
+                    glDepthFunc(GL_LESS);
                 }
                 else
                 {
-                    glEnable(GL_BLEND);  // add next lights
+                    glEnable(GL_BLEND);
                     glBlendFunc(GL_ONE, GL_ONE);
+                                
+                                // IMPORTANT: Disable ambient for additional passes so it's not added multiple times
+                    uniform_data.ambient_light = Vector3(0.0f, 0.0f, 0.0f);
+                                
+                                // Use GL_EQUAL to ensure we only shade pixels that passed the first depth test
+                    glDepthFunc(GL_EQUAL);
                 }
 
                 uniform_data.current_light = uniform_data.lights[i];
@@ -184,6 +205,8 @@ void Application::Render(void)
             }
 
             glDisable(GL_BLEND);
+            glDepthFunc(GL_LESS);
+            uniform_data.ambient_light = originalAmbient;
         }
     }
 
@@ -223,8 +246,8 @@ void Application::OnKeyPressed( SDL_KeyboardEvent event)
             break;
 
         case SDLK_4:
-            if (lab5)
-                uniform_data.num_lights = 4;
+            if (lab5){
+                uniform_data.num_lights = 4;}
             else
                 currentTask = 4;
             break;
