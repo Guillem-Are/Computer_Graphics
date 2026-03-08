@@ -103,6 +103,12 @@ void Application::Init(void)
     light1.diffuse  = Vector3(1.0f, 1.0f, 1.0f);
     uniform_data.lights.push_back(light1);
     
+    sLight light2;
+    light2.position = Vector3(-5.0f,5.0f,5.0f);
+    light2.diffuse  = Vector3(1.0f,0.0f,0.0f);
+
+    uniform_data.lights.push_back(light2);
+    
     
 }
 
@@ -149,18 +155,37 @@ void Application::Render(void)
         }
         
     }
-    else // lab 5
-    {
-        glEnable(GL_DEPTH_TEST);
+    else // -------- LAB 5 --------
+        {
+            glEnable(GL_DEPTH_TEST);
 
-                // Update scene-level uniforms every frame
-                uniform_data.viewprojection  = camera->GetViewProjectionMatrix();
-                uniform_data.camera_position = camera->eye;
+            uniform_data.viewprojection  = camera->GetViewProjectionMatrix();
+            uniform_data.camera_position = camera->eye;
+
+            // multipass lighting
+            int numLights = std::min(uniform_data.num_lights, (int)uniform_data.lights.size());
+
+            for (int i = 0; i < numLights; i++)
+            {
+                if (i == 0)
+                {
+                    glDisable(GL_BLEND); // first light normal render
+                }
+                else
+                {
+                    glEnable(GL_BLEND);  // add next lights
+                    glBlendFunc(GL_ONE, GL_ONE);
+                }
+
+                uniform_data.current_light = uniform_data.lights[i];
 
                 for (Entity* e : entities)
                     e->Render(uniform_data);
+            }
+
+            glDisable(GL_BLEND);
+        }
     }
-}
 
 // Called after render
 void Application::Update(float seconds_elapsed)
@@ -175,39 +200,75 @@ void Application::OnKeyPressed( SDL_KeyboardEvent event)
     // KEY CODES: https://wiki.libsdl.org/SDL2/SDL_Keycode
     switch(event.keysym.sym) {
         case SDLK_ESCAPE: exit(0); break; // ESC key, kill the app
-      
-        case SDLK_1: currentTask = 1; break;
-        case SDLK_2: currentTask = 2; break;
-        case SDLK_3: currentTask = 3; break;
-        case SDLK_4: currentTask = 4; break;
+           
+        case SDLK_1:
+            if (lab5)
+                uniform_data.num_lights = 1;
+            else
+                currentTask = 1;
+            break;
 
-        //case SDLK_a: currentSubtask = 0; currentFS = "shaders/task" + std::to_string(currentTask) + "a.fs"; break;
-            //case SDLK_b: currentSubtask = 1; currentFS = "shaders/task" + std::to_string(currentTask) + "b.fs"; break;
-            //case SDLK_c: currentSubtask = 2; currentFS = "shaders/task" + std::to_string(currentTask) + "c.fs"; break;
-            //case SDLK_d: currentSubtask = 3; currentFS = "shaders/task" + std::to_string(currentTask) + "d.fs"; break;
-            //case SDLK_e: currentSubtask = 4; currentFS = "shaders/task" + std::to_string(currentTask) + "e.fs"; break;
-            //case SDLK_f: currentSubtask = 5; currentFS = "shaders/task" + std::to_string(currentTask) + "f.fs"; break;
+        case SDLK_2:
+            if (lab5)
+                uniform_data.num_lights = 2;
+            else
+                currentTask = 2;
+            break;
+
+        case SDLK_3:
+            if (lab5)
+                uniform_data.num_lights = 3;
+            else
+                currentTask = 3;
+            break;
+
+        case SDLK_4:
+            if (lab5)
+                uniform_data.num_lights = 4;
+            else
+                currentTask = 4;
+            break;
+
+                    // --- Lab4 Subtasks ---
         case SDLK_a: currentSubtask = 0; break;
         case SDLK_b: currentSubtask = 1; break;
-        case SDLK_c: if (lab5) phong_material->use_color_texture = !phong_material->use_color_texture; else currentSubtask = 2;break;
+        case SDLK_c:
+            if (lab5)
+                phong_material->use_color_texture = !phong_material->use_color_texture;
+            else
+                currentSubtask = 2;
+            break;
         case SDLK_d: currentSubtask = 3; break;
         case SDLK_e: currentSubtask = 4; break;
         case SDLK_f: currentSubtask = 5; break;
-        case SDLK_l: lab5 = !lab5; break;
-        case SDLK_g: for (Entity* e : entities) e->material = gouraud_material; break;
-        case SDLK_p: for (Entity* e : entities) e->material = phong_material; break;
-        case SDLK_s: phong_material->use_specular_texture = !phong_material->use_specular_texture; break;
-        case SDLK_n: phong_material->use_normal_texture = !phong_material->use_normal_texture; break;
-     }
 
-     // Always rebuild shader filename after any change
-    if (currentTask >= 1 && currentTask <= 3) {
-        char letter = 'a' + currentSubtask;
-        currentFS = std::string("shaders/task") + std::to_string(currentTask) + letter + ".fs";
-        std::cout << "Loading shader: " << currentFS << std::endl;
-    }
-    
-}
+                    // --- Lab selection ---
+        case SDLK_l: lab5 = !lab5; break;
+
+                    // --- Lab5 shading selection ---
+        case SDLK_g:
+            for (Entity* e : entities)
+                e->material = gouraud_material;
+            break;
+
+        case SDLK_p:
+            for (Entity* e : entities)
+                e->material = phong_material;
+            break;
+
+                    // --- Lab5 Phong textures toggles ---
+        case SDLK_s: phong_material->use_specular_texture = !phong_material->use_specular_texture; break;
+
+        case SDLK_n: phong_material->use_normal_texture = !phong_material->use_normal_texture; break;
+                }
+
+                // --- Always rebuild shader filename for Lab4 tasks ---
+        if (currentTask >= 1 && currentTask <= 3) {
+            char letter = 'a' + currentSubtask;
+            currentFS = std::string("shaders/task") + std::to_string(currentTask) + letter + ".fs";
+            std::cout << "Loading shader: " << currentFS << std::endl;
+                }
+            }
 
 void Application::OnMouseButtonDown( SDL_MouseButtonEvent event )
 {

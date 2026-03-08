@@ -28,6 +28,8 @@ struct sUniformData {
     Vector3  camera_position;
     std::vector<sLight> lights;   // vector, not raw pointer
     bool is_first_pass = true;
+    sLight current_light;
+    int num_lights = 1;
 };
 
 class Material {

@@ -24,10 +24,10 @@ void Material::Enable(const sUniformData& uniformData)
     shader->SetUniform3("u_ambient_light", uniformData.ambient_light);
 
     // First light
-    if (!uniformData.lights.empty()) {
-        shader->SetUniform3("u_light_position", uniformData.lights[0].position);
-        shader->SetUniform3("u_light_color", uniformData.lights[0].diffuse);
-    }
+    
+    shader->SetUniform3("u_light_position", uniformData.current_light.position);
+    shader->SetUniform3("u_light_color", uniformData.current_light.diffuse);
+    
 
     // Material properties
     shader->SetUniform3("u_Ka", Ka);
